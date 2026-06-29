@@ -7,7 +7,6 @@ import { ArrowLeft, Eye, Clock, Play, AlertTriangle, Home } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
-import { AdNative } from '@/components/AdBanner'
 
 interface Category {
   id: string
@@ -487,8 +486,6 @@ export default function VideoPage() {
               </Button>
             </div>
 
-            {/* ── Native Banner: Below Video Player ── */}
-            <AdNative key={`ad-player-${video.id}`} />
           </motion.div>
 
           {/* Sidebar - Related Videos (Desktop only) */}
@@ -499,9 +496,6 @@ export default function VideoPage() {
             className="hidden lg:block"
           >
             <div className="sticky top-20">
-              {/* ── Native Banner: Sidebar ── */}
-              <AdNative key={`ad-sidebar-${video.id}`} />
-
               <h3 className="text-lg font-bold text-white mb-4">Related Videos</h3>
               {relatedVideos.length === 0 ? (
                 <p className="text-gray-500 text-sm">No related videos.</p>
@@ -523,9 +517,6 @@ export default function VideoPage() {
           transition={{ duration: 0.3, delay: 0.2 }}
           className="lg:hidden mt-8"
         >
-          {/* ── Native Banner: Mobile related ── */}
-          <AdNative key={`ad-mobile-rel-${video.id}`} />
-
           <h3 className="text-lg font-bold text-white mb-4">Related Videos</h3>
           {relatedVideos.length === 0 ? (
             <p className="text-gray-500 text-sm">No related videos.</p>

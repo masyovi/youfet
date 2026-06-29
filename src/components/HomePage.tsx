@@ -6,7 +6,6 @@ import { Play, Eye, Clock, SearchX, ChevronLeft, ChevronRight } from 'lucide-rea
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useAppStore } from '@/store/app'
-import { AdNative } from '@/components/AdBanner'
 
 interface Category {
   id: string
@@ -276,8 +275,6 @@ export function HomePage() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }, [])
 
-  const adRefreshKey = `${selectedCategoryId}-${searchQuery}-${currentPage}`
-
   // Split video groups for in-feed ads
   const group1 = paginatedVideos.slice(0, 4)
   const group2 = paginatedVideos.slice(4, 8)
@@ -356,9 +353,6 @@ export function HomePage() {
                 </div>
               )}
 
-              {/* ── In-Feed Native Banner 1 ── */}
-              {group2.length > 0 && <AdNative key={`native-ad-1-${adRefreshKey}`} />}
-
               {/* ── Grid Row 2: Videos 5-8 ── */}
               {group2.length > 0 && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
@@ -367,9 +361,6 @@ export function HomePage() {
                   ))}
                 </div>
               )}
-
-              {/* ── In-Feed Native Banner 2 ── */}
-              {group3.length > 0 && <AdNative key={`native-ad-2-${adRefreshKey}`} />}
 
               {/* ── Grid Row 3: Videos 9+ ── */}
               {group3.length > 0 && (

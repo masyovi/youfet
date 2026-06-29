@@ -6,8 +6,6 @@ import { Toaster } from "sonner";
 import { ServiceWorkerRegistration } from "@/components/ServiceWorkerRegistration";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { AdPopunder } from "@/components/AdBanner";
-
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -81,7 +79,6 @@ export default function RootLayout({
           </main>
           <Footer />
         </div>
-        <AdPopunder />
         <ServiceWorkerRegistration />
         <ShadcnToaster />
         <Toaster richColors position="top-right" />
