@@ -1,0 +1,30 @@
+{
+  "code": 200,
+  "data": {
+    "description": "",
+    "external": {
+      "preconnect": {
+        "https://ghabovethec.info/": {},
+        "https://oundhertobeconsist.org/": {},
+        "https://yronesefurther.org/": {}
+      }
+    },
+    "html": "<html lang=\"en\"><head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>404 - Page Not Found</title>\n  <style>\n    body {\n      background-color: #f0f0f0;\n      font-family: Arial, sans-serif;\n      margin: 0;\n      padding: 0;\n    }\n\n    .container {\n      display: flex;\n      flex-direction: column;\n      align-items: center;\n      justify-content: center;\n      height: 100vh;\n      text-align: center;\n    }\n\n    .logo {\n      width: 150px;\n      margin-bottom: 30px;\n    }\n\n    h1 {\n      font-size: 36px;\n      margin-bottom: 20px;\n      color: #333;\n    }\n\n    p {\n      font-size: 18px;\n      margin-bottom: 30px;\n      color: #666;\n    }\n\n    a {\n      color: #fff;\n      background-color: #687ce3;\n      padding: 10px 20px;\n      border-radius: 4px;\n      text-decoration: none;\n      transition: background-color 0.3s ease;\n    }\n\n    a:hover {\n      background-color: #687ce3;\n    }\n  </style>\n<link rel=\"preconnect\" href=\"//oundhertobeconsist.org\"><link rel=\"preconnect\" href=\"//yronesefurther.org\"><link rel=\"preconnect\" href=\"//ghabovethec.info\"><link rel=\"preconnect\" href=\"//oundhertobeconsist.org\"><link rel=\"preconnect\" href=\"//yronesefurther.org\"><link rel=\"preconnect\" href=\"//ghabovethec.info\"></head>\n<body>\n  <div class=\"container\">\n    <img src=\"/assets/img/logo.png\" alt=\"Logo\" class=\"logo\">\n    <h1>Oops! Page Not Found</h1>\n    <p>Sorry, the page you're looking for doesn't exist or has been moved.</p>\n    <a href=\"/\">Go back to Home</a>\n  </div>\n  <script data-cfasync=\"false\" async=\"\" type=\"text/javascript\" src=\"//yf.diasyrmunionic.com/rxvdwbKHoXf0GTuNp/84626\"></script>\n<div class=\"item-advertising\" style=\"position: fixed; left: -200px; opacity: 0;\">test</div>\n       <!-- Google tag (gtag.js) -->\n  <script async=\"\" src=\"https://www.googletagmanager.com/gtag/js?id=G-ZBH92MV9JH\"></script>\n  <script>\n    window.dataLayer = window.dataLayer || [];\n    function gtag(){dataLayer.push(arguments);}\n    gtag('js', new Date());\n  \n    gtag('config', 'G-ZBH92MV9JH');\n  </script>\n\n\n</body></html>",
+    "metadata": {
+      "lang": "en",
+      "viewport": "width=device-width, initial-scale=1.0"
+    },
+    "title": "404 - Page Not Found",
+    "url": "https://lulustream.com/api",
+    "usage": {
+      "tokens": 629
+    },
+    "warning": "Target URL returned error 404: Not Found"
+  },
+  "meta": {
+    "usage": {
+      "tokens": 629
+    }
+  },
+  "status": 20000
+}

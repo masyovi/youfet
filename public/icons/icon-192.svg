@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f97316"/>
+      <stop offset="100%" stop-color="#ea580c"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+  <!-- Rounded square background -->
+  <rect x="2" y="2" width="188" height="188" rx="40" ry="40" fill="url(#bg)"/>
+  <!-- Subtle inner highlight -->
+  <rect x="2" y="2" width="188" height="94" rx="40" ry="40" fill="white" opacity="0.07"/>
+  <!-- Play triangle -->
+  <polygon
+    points="78,56 78,136 140,96"
+    fill="white"
+    filter="url(#shadow)"
+  />
+</svg>

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="960" viewBox="0 0 960 960">
+  <defs>
+    <linearGradient id="icon-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f97316"/>
+      <stop offset="100%" stop-color="#ea580c"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Black background -->
+  <rect width="960" height="960" fill="#030712"/>
+
+  <!-- Orange play button icon (~30% of 960 ≈ 288px area) -->
+  <!-- Triangle: width=200, height=173, centered at (480, 400) -->
+  <polygon
+    points="380,313.5 380,486.5 580,400"
+    fill="url(#icon-gradient)"
+  />
+
+  <!-- "YouFet" label -->
+  <text
+    x="480"
+    y="540"
+    text-anchor="middle"
+    font-family="Arial, Helvetica, sans-serif"
+    font-size="48"
+    font-weight="bold"
+    fill="#ffffff"
+    letter-spacing="2"
+  >YouFet</text>
+</svg>

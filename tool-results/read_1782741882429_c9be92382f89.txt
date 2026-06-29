@@ -1,0 +1,1642 @@
+     1→'use client'
+     2→
+     3→import { useEffect, useState, useCallback, useRef } from 'react'
+     4→import { useRouter } from 'next/navigation'
+     5→import { motion } from 'framer-motion'
+     6→import {
+     7→  Plus,
+     8→  Trash2,
+     9→  Pencil,
+    10→  ArrowLeft,
+    11→  LogOut,
+    12→  FolderOpen,
+    13→  VideoIcon,
+    14→  Star,
+    15→  Loader2,
+    16→  ImageIcon,
+    17→  RefreshCw,
+    18→  ExternalLink,
+    19→  Upload,
+    20→  Link,
+    21→  Cloud,
+    22→  CheckCircle2,
+    23→  AlertCircle,
+    24→  FileVideo,
+    25→  HardDrive,
+    26→  CircleUserRound,
+    27→  Crown,
+    28→  Database,
+    29→  DollarSign,
+    30→  Clock,
+    31→} from 'lucide-react'
+    32→import { toast } from 'sonner'
+    33→import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+    34→import { Button } from '@/components/ui/button'
+    35→import { Input } from '@/components/ui/input'
+    36→import { Textarea } from '@/components/ui/textarea'
+    37→import { Label } from '@/components/ui/label'
+    38→import { Switch } from '@/components/ui/switch'
+    39→import { Badge } from '@/components/ui/badge'
+    40→import { Skeleton } from '@/components/ui/skeleton'
+    41→import { Progress } from '@/components/ui/progress'
+    42→import {
+    43→  Dialog,
+    44→  DialogContent,
+    45→  DialogDescription,
+    46→  DialogFooter,
+    47→  DialogHeader,
+    48→  DialogTitle,
+    49→} from '@/components/ui/dialog'
+    50→import {
+    51→  Table,
+    52→  TableBody,
+    53→  TableCell,
+    54→  TableHead,
+    55→  TableHeader,
+    56→  TableRow,
+    57→} from '@/components/ui/table'
+    58→import {
+    59→  Select,
+    60→  SelectContent,
+    61→  SelectItem,
+    62→  SelectTrigger,
+    63→  SelectValue,
+    64→} from '@/components/ui/select'
+    65→import { useAppStore } from '@/store/app'
+    66→
+    67→// ─── Types ───────────────────────────────────────────────
+    68→interface Category {
+    69→  id: string
+    70→  name: string
+    71→  slug: string
+    72→}
+    73→
+    74→interface Video {
+    75→  id: string
+    76→  title: string
+    77→  slug: string
+    78→  description: string
+    79→  embedUrl: string
+    80→  thumbnailUrl: string | null
+    81→  categoryId: string
+    82→  featured: boolean
+    83→  views: number
+    84→  createdAt: string
+    85→  category?: Category
+    86→}
+    87→
+    88→interface LuluFile {
+    89→  file_code: string
+    90→  title: string
+    91→  thumbnail: string
+    92→  link: string
+    93→  length: string
+    94→  views: string
+    95→  uploaded: string
+    96→  canplay: number
+    97→}
+    98→
+    99→// ─── Component ───────────────────────────────────────────
+   100→export function AdminDashboard() {
+   101→  const router = useRouter()
+   102→  const { goHome, setAdminLoggedIn } = useAppStore()
+   103→
+   104→  const [categories, setCategories] = useState<Category[]>([])
+   105→  const [videos, setVideos] = useState<Video[]>([])
+   106→  const [loading, setLoading] = useState(true)
+   107→
+   108→  // ─── Data Fetching ──────────────────────────────────────
+   109→  const fetchCategories = useCallback(async () => {
+   110→    try {
+   111→      const res = await fetch('/api/categories')
+   112→      if (!res.ok) throw new Error('Failed to load categories')
+   113→      const data = await res.json()
+   114→      setCategories(data)
+   115→      return data
+   116→    } catch {
+   117→      toast.error('Failed to load categories')
+   118→      return []
+   119→    }
+   120→  }, [])
+   121→
+   122→  const fetchVideos = useCallback(async () => {
+   123→    try {
+   124→      const res = await fetch('/api/videos')
+   125→      if (!res.ok) throw new Error('Failed to load videos')
+   126→      const data = await res.json()
+   127→      setVideos(data)
+   128→    } catch {
+   129→      toast.error('Failed to load videos')
+   130→    }
+   131→  }, [])
+   132→
+   133→  const fetchAll = useCallback(async () => {
+   134→    setLoading(true)
+   135→    await Promise.all([fetchCategories(), fetchVideos()])
+   136→    setLoading(false)
+   137→  }, [fetchCategories, fetchVideos])
+   138→
+   139→  useEffect(() => {
+   140→    fetchAll()
+   141→  }, [fetchAll])
+   142→
+   143→  // ─── Category CRUD ──────────────────────────────────────
+   144→  const [catDialogOpen, setCatDialogOpen] = useState(false)
+   145→  const [catForm, setCatForm] = useState({ name: '' })
+   146→
+   147→  const openCategoryDialog = () => {
+   148→    setCatForm({ name: '' })
+   149→    setCatDialogOpen(true)
+   150→  }
+   151→
+   152→  const handleCreateCategory = async () => {
+   153→    if (!catForm.name.trim()) {
+   154→      toast.error('Category name is required')
+   155→      return
+   156→    }
+   157→    try {
+   158→      const res = await fetch('/api/categories', {
+   159→        method: 'POST',
+   160→        headers: { 'Content-Type': 'application/json' },
+   161→        body: JSON.stringify({ name: catForm.name.trim() }),
+   162→      })
+   163→      if (!res.ok) throw new Error('Failed to create category')
+   164→      toast.success('Category created successfully')
+   165→      setCatDialogOpen(false)
+   166→      await fetchAll()
+   167→    } catch {
+   168→      toast.error('Failed to create category')
+   169→    }
+   170→  }
+   171→
+   172→  const handleDeleteCategory = async (id: string) => {
+   173→    if (!confirm('Are you sure you want to delete this category?')) return
+   174→    try {
+   175→      const res = await fetch(`/api/categories/${id}`, { method: 'DELETE' })
+   176→      if (!res.ok) throw new Error('Failed to delete category')
+   177→      toast.success('Category deleted successfully')
+   178→      await fetchAll()
+   179→    } catch {
+   180→      toast.error('Failed to delete category')
+   181→    }
+   182→  }
+   183→
+   184→  // ─── Video CRUD ─────────────────────────────────────────
+   185→  const [videoDialogOpen, setVideoDialogOpen] = useState(false)
+   186→  const [editingVideoId, setEditingVideoId] = useState<string | null>(null)
+   187→  const [videoForm, setVideoForm] = useState({
+   188→    title: '',
+   189→    slug: '',
+   190→    description: '',
+   191→    embedUrl: '',
+   192→    thumbnailUrl: '',
+   193→    categoryId: '',
+   194→    featured: false,
+   195→  })
+   196→  const [generatingThumbnail, setGeneratingThumbnail] = useState(false)
+   197→  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null)
+   198→
+   199→  const openVideoDialog = (video?: Video) => {
+   200→    if (video) {
+   201→      setEditingVideoId(video.id)
+   202→      setVideoForm({
+   203→        title: video.title,
+   204→        slug: video.slug || '',
+   205→        description: video.description,
+   206→        embedUrl: video.embedUrl,
+   207→        thumbnailUrl: video.thumbnailUrl || '',
+   208→        categoryId: video.categoryId,
+   209→        featured: video.featured,
+   210→      })
+   211→      setThumbnailPreview(video.thumbnailUrl || null)
+   212→    } else {
+   213→      setEditingVideoId(null)
+   214→      setVideoForm({
+   215→        title: '',
+   216→        slug: '',
+   217→        description: '',
+   218→        embedUrl: '',
+   219→        thumbnailUrl: '',
+   220→        categoryId: categories[0]?.id || '',
+   221→        featured: false,
+   222→      })
+   223→      setThumbnailPreview(null)
+   224→    }
+   225→    setVideoDialogOpen(true)
+   226→  }
+   227→
+   228→  const openVideoDialogWithEmbed = (embedUrl: string, title?: string, thumbnailUrl?: string) => {
+   229→    setEditingVideoId(null)
+   230→    setVideoForm({
+   231→      title: title || '',
+   232→      slug: title ? title.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').replace(/-+/g, '-') : '',
+   233→      description: '',
+   234→      embedUrl,
+   235→      thumbnailUrl: thumbnailUrl || '',
+   236→      categoryId: categories[0]?.id || '',
+   237→      featured: false,
+   238→    })
+   239→    setThumbnailPreview(thumbnailUrl || null)
+   240→    setVideoDialogOpen(true)
+   241→  }
+   242→
+   243→  const handleGenerateThumbnail = async () => {
+   244→    if (!videoForm.embedUrl.trim()) {
+   245→      toast.error('Embed URL is required first')
+   246→      return
+   247→    }
+   248→    setGeneratingThumbnail(true)
+   249→    try {
+   250→      const res = await fetch('/api/thumbnail', {
+   251→        method: 'POST',
+   252→        headers: { 'Content-Type': 'application/json' },
+   253→        body: JSON.stringify({ embedUrl: videoForm.embedUrl.trim() }),
+   254→      })
+   255→      if (!res.ok) throw new Error('Failed to generate thumbnail')
+   256→      const data = await res.json()
+   257→      setVideoForm((f) => ({ ...f, thumbnailUrl: data.thumbnailUrl }))
+   258→      setThumbnailPreview(data.thumbnailUrl)
+   259→      toast.success(
+   260→        data.source === 'direct'
+   261→          ? 'Thumbnail extracted from platform'
+   262→          : 'Thumbnail screenshot created'
+   263→      )
+   264→    } catch {
+   265→      toast.error('Failed to generate thumbnail')
+   266→    } finally {
+   267→      setGeneratingThumbnail(false)
+   268→    }
+   269→  }
+   270→
+   271→  const handleSaveVideo = async () => {
+   272→    if (!videoForm.title.trim()) {
+   273→      toast.error('Video title is required')
+   274→      return
+   275→    }
+   276→    if (!videoForm.embedUrl.trim()) {
+   277→      toast.error('Video embed URL is required')
+   278→      return
+   279→    }
+   280→
+   281→    try {
+   282→      const url = editingVideoId
+   283→        ? `/api/videos/${editingVideoId}`
+   284→        : '/api/videos'
+   285→      const method = editingVideoId ? 'PUT' : 'POST'
+   286→
+   287→      const res = await fetch(url, {
+   288→        method,
+   289→        headers: { 'Content-Type': 'application/json' },
+   290→        body: JSON.stringify({
+   291→          ...videoForm,
+   292→          title: videoForm.title.trim(),
+   293→          slug: videoForm.slug.trim() || undefined,
+   294→          embedUrl: videoForm.embedUrl.trim(),
+   295→          thumbnailUrl: videoForm.thumbnailUrl.trim() || undefined,
+   296→        }),
+   297→      })
+   298→      if (!res.ok) throw new Error('Failed to save video')
+   299→      toast.success(
+   300→        editingVideoId ? 'Video updated successfully' : 'Video created successfully'
+   301→      )
+   302→      setVideoDialogOpen(false)
+   303→      await fetchAll()
+   304→    } catch {
+   305→      toast.error('Failed to save video')
+   306→    }
+   307→  }
+   308→
+   309→  const handleDeleteVideo = async (id: string) => {
+   310→    if (!confirm('Are you sure you want to delete this video?')) return
+   311→    try {
+   312→      const res = await fetch(`/api/videos/${id}`, { method: 'DELETE' })
+   313→      if (!res.ok) throw new Error('Failed to delete video')
+   314→      toast.success('Video deleted successfully')
+   315→      await fetchAll()
+   316→    } catch {
+   317→      toast.error('Failed to delete video')
+   318→    }
+   319→  }
+   320→
+   321→  const handleLogout = async () => {
+   322→    try {
+   323→      await fetch('/api/auth/logout', { method: 'POST' })
+   324→    } catch {
+   325→      // ignore
+   326→    }
+   327→    setAdminLoggedIn(false)
+   328→    goHome()
+   329→  }
+   330→
+   331→  const handleToggleFeatured = async (video: Video) => {
+   332→    try {
+   333→      const res = await fetch(`/api/videos/${video.id}`, {
+   334→        method: 'PUT',
+   335→        headers: { 'Content-Type': 'application/json' },
+   336→        body: JSON.stringify({
+   337→          title: video.title,
+   338→          slug: video.slug,
+   339→          description: video.description,
+   340→          embedUrl: video.embedUrl,
+   341→          categoryId: video.categoryId,
+   342→          featured: !video.featured,
+   343→        }),
+   344→      })
+   345→      if (!res.ok) throw new Error('Failed to update status')
+   346→      toast.success('Status updated successfully')
+   347→      await fetchAll()
+   348→    } catch {
+   349→      toast.error('Failed to update status')
+   350→    }
+   351→  }
+   352→
+   353→  // ─── LuluStream Upload State ────────────────────────────
+   354→  const [uploadTab, setUploadTab] = useState<'file' | 'url'>('file')
+   355→  const [uploadFile, setUploadFile] = useState<File | null>(null)
+   356→  const [uploadTitle, setUploadTitle] = useState('')
+   357→  const [uploadUrl, setUploadUrl] = useState('')
+   358→  const [uploading, setUploading] = useState(false)
+   359→  const [uploadProgress, setUploadProgress] = useState(0)
+   360→  const [uploadResult, setUploadResult] = useState<{
+   361→    filecode: string
+   362→    embedUrl: string
+   363→    thumbnailUrl: string
+   364→  } | null>(null)
+   365→
+   366→  // LuluStream file browser
+   367→  const [luluFiles, setLuluFiles] = useState<LuluFile[]>([])
+   368→  const [luluFilesLoading, setLuluFilesLoading] = useState(false)
+   369→  const [luluFilesPage, setLuluFilesPage] = useState(1)
+   370→  const [luluFilesTotal, setLuluFilesTotal] = useState(0)
+   371→
+   372→  const fileInputRef = useRef<HTMLInputElement>(null)
+   373→
+   374→  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+   375→    const file = e.target.files?.[0]
+   376→    if (file) {
+   377→      setUploadFile(file)
+   378→      if (!uploadTitle) setUploadTitle(file.name.replace(/\.[^.]+$/, ''))
+   379→    }
+   380→  }
+   381→
+   382→  const handleDrop = (e: React.DragEvent) => {
+   383→    e.preventDefault()
+   384→    const file = e.dataTransfer.files?.[0]
+   385→    if (file) {
+   386→      setUploadFile(file)
+   387→      if (!uploadTitle) setUploadTitle(file.name.replace(/\.[^.]+$/, ''))
+   388→    }
+   389→  }
+   390→
+   391→  const handleFileUpload = async () => {
+   392→    if (!uploadFile) {
+   393→      toast.error('Please select a file first')
+   394→      return
+   395→    }
+   396→    setUploading(true)
+   397→    setUploadProgress(0)
+   398→
+   399→    try {
+   400→      console.log('[Upload] Starting:', uploadFile.name, (uploadFile.size / 1024 / 1024).toFixed(1), 'MB')
+   401→
+   402→      // Step 1: Get upload server URL from our API (small payload, no file)
+   403→      const serverRes = await fetch('/api/lulustream/upload-server', {
+   404→        method: 'POST',
+   405→      })
+   406→      const serverData = await serverRes.json()
+   407→      if (!serverRes.ok || !serverData.success) {
+   408→        throw new Error(serverData.error || 'Failed to get upload server')
+   409→      }
+   410→
+   411→      const uploadServerUrl = serverData.uploadServer as string
+   412→      const apiKey = serverData.apiKey as string
+   413→      console.log('[Upload] Server:', uploadServerUrl)
+   414→
+   415→      // Step 2: Upload file DIRECTLY from browser to LuluStream (bypasses our server size limit)
+   416→      const luluForm = new FormData()
+   417→      luluForm.append('key', apiKey)
+   418→      luluForm.append('file', uploadFile)
+   419→      if (uploadTitle) luluForm.append('file_title', uploadTitle)
+   420→      luluForm.append('file_public', '1')
+   421→
+   422→      // Use XMLHttpRequest for real upload progress tracking
+   423→      const uploadResult = await new Promise<{
+   424→        status: number
+   425→        files: { filecode: string; filename: string; status: string }[]
+   426→      }>((resolve, reject) => {
+   427→        const xhr = new XMLHttpRequest()
+   428→
+   429→        xhr.upload.addEventListener('progress', (e) => {
+   430→          if (e.lengthComputable) {
+   431→            const pct = Math.round((e.loaded / e.total) * 100)
+   432→            setUploadProgress(pct)
+   433→          }
+   434→        })
+   435→
+   436→        xhr.addEventListener('load', () => {
+   437→          if (xhr.status >= 200 && xhr.status < 300) {
+   438→            try {
+   439→              const json = JSON.parse(xhr.responseText)
+   440→              resolve(json)
+   441→            } catch {
+   442→              reject(new Error(`Invalid response: ${xhr.responseText.substring(0, 200)}`))
+   443→            }
+   444→          } else {
+   445→            try {
+   446→              const json = JSON.parse(xhr.responseText)
+   447→              reject(new Error(json.msg || `Upload failed (HTTP ${xhr.status})`))
+   448→            } catch {
+   449→              reject(new Error(`Upload failed (HTTP ${xhr.status})`))
+   450→            }
+   451→          }
+   452→        })
+   453→
+   454→        xhr.addEventListener('error', () => {
+   455→          reject(new Error('Network error while uploading to LuluStream'))
+   456→        })
+   457→
+   458→        xhr.addEventListener('abort', () => {
+   459→          reject(new Error('Upload cancelled'))
+   460→        })
+   461→
+   462→        xhr.open('POST', uploadServerUrl)
+   463→        xhr.send(luluForm)
+   464→      })
+   465→
+   466→      console.log('[Upload] Result:', JSON.stringify(uploadResult))
+   467→
+   468→      if (uploadResult.status !== 200 || !uploadResult.files || uploadResult.files.length === 0) {
+   469→        throw new Error('Upload completed but no file code returned')
+   470→      }
+   471→
+   472→      const filecode = uploadResult.files[0].filecode
+   473→      const embedUrl = `https://luluvid.com/e/${filecode}`
+   474→      const thumbnailUrl = `https://img.lulucdn.com/${filecode}.jpg`
+   475→
+   476→      setUploadResult({ filecode, embedUrl, thumbnailUrl })
+   477→      toast.success('Video uploaded to LuluStream!')
+   478→    } catch (error) {
+   479→      console.error('[Upload] Error:', error)
+   480→      toast.error(error instanceof Error ? error.message : 'Upload failed')
+   481→    } finally {
+   482→      setUploading(false)
+   483→      setUploadProgress(0)
+   484→    }
+   485→  }
+   486→
+   487→  const handleUrlUpload = async () => {
+   488→    if (!uploadUrl.trim()) {
+   489→      toast.error('Please enter a video URL')
+   490→      return
+   491→    }
+   492→    setUploading(true)
+   493→    setUploadProgress(0)
+   494→
+   495→    try {
+   496→      const progressInterval = setInterval(() => {
+   497→        setUploadProgress((prev) => {
+   498→          if (prev >= 90) {
+   499→            clearInterval(progressInterval)
+   500→            return 90
+   501→          }
+   502→          return prev + Math.random() * 10
+   503→        })
+   504→      }, 800)
+   505→
+   506→      const res = await fetch('/api/lulustream/upload-url', {
+   507→        method: 'POST',
+   508→        headers: { 'Content-Type': 'application/json' },
+   509→        body: JSON.stringify({ url: uploadUrl.trim() }),
+   510→      })
+   511→
+   512→      clearInterval(progressInterval)
+   513→      setUploadProgress(100)
+   514→
+   515→      const data = await res.json()
+   516→      if (!res.ok || !data.success) throw new Error(data.error || 'Upload failed')
+   517→
+   518→      const filecode = data.filecode
+   519→      const embedUrl = `https://luluvid.com/e/${filecode}`
+   520→      const thumbnailUrl = `https://img.lulucdn.com/${filecode}.jpg`
+   521→
+   522→      setUploadResult({ filecode, embedUrl, thumbnailUrl })
+   523→      toast.success('Video uploaded to LuluStream!')
+   524→    } catch (error) {
+   525→      toast.error(error instanceof Error ? error.message : 'Upload failed')
+   526→    } finally {
+   527→      setUploading(false)
+   528→    }
+   529→  }
+   530→
+   531→  const fetchLuluFiles = useCallback(async (page = 1) => {
+   532→    setLuluFilesLoading(true)
+   533→    try {
+   534→      const res = await fetch(`/api/lulustream/files?page=${page}&per_page=20`)
+   535→      if (!res.ok) throw new Error('Failed to fetch files')
+   536→      const data = await res.json()
+   537→      setLuluFiles(data.files || [])
+   538→      setLuluFilesTotal(data.results_total || 0)
+   539→      setLuluFilesPage(page)
+   540→    } catch (error) {
+   541→      toast.error(error instanceof Error ? error.message : 'Failed to load LuluStream files')
+   542→      setLuluFiles([])
+   543→    } finally {
+   544→      setLuluFilesLoading(false)
+   545→    }
+   546→  }, [])
+   547→
+   548→  const resetUpload = () => {
+   549→    setUploadFile(null)
+   550→    setUploadTitle('')
+   551→    setUploadUrl('')
+   552→    setUploadProgress(0)
+   553→    setUploadResult(null)
+   554→    if (fileInputRef.current) fileInputRef.current.value = ''
+   555→  }
+   556→
+   557→  // ─── LuluStream Account Info ───────────────────────────
+   558→  const [accountInfo, setAccountInfo] = useState<{
+   559→    login: string
+   560→    email: string
+   561→    premium: number
+   562→    premium_expire: string
+   563→    balance: string
+   564→    storage_used: string
+   565→    storage_left: string
+   566→    files_total: string
+   567→  } | null>(null)
+   568→  const [accountLoading, setAccountLoading] = useState(false)
+   569→  const [accountError, setAccountError] = useState<string | null>(null)
+   570→
+   571→  const fetchAccountInfo = useCallback(async () => {
+   572→    setAccountLoading(true)
+   573→    setAccountError(null)
+   574→    try {
+   575→      const res = await fetch('/api/lulustream/account')
+   576→      const data = await res.json()
+   577→      if (!res.ok || !data.success) throw new Error(data.error || 'Failed to load account info')
+   578→      setAccountInfo({
+   579→        login: data.login,
+   580→        email: data.email,
+   581→        premium: data.premium,
+   582→        premium_expire: data.premium_expire,
+   583→        balance: data.balance,
+   584→        storage_used: data.storage_used,
+   585→        storage_left: data.storage_left,
+   586→        files_total: data.files_total,
+   587→      })
+   588→    } catch (error) {
+   589→      setAccountError(error instanceof Error ? error.message : 'Failed to load account info')
+   590→      setAccountInfo(null)
+   591→    } finally {
+   592→      setAccountLoading(false)
+   593→    }
+   594→  }, [])
+   595→
+   596→  // ─── Loading State ──────────────────────────────────────
+   597→  if (loading) {
+   598→    return (
+   599→      <div className="flex-1">
+   600→        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+   601→          <Skeleton className="h-8 w-48" />
+   602→          <Skeleton className="h-10 w-64" />
+   603→          <div className="space-y-3">
+   604→            {Array.from({ length: 5 }).map((_, i) => (
+   605→              <Skeleton key={i} className="h-12 w-full" />
+   606→            ))}
+   607→          </div>
+   608→        </div>
+   609→      </div>
+   610→    )
+   611→  }
+   612→
+   613→  return (
+   614→    <div className="flex-1">
+   615→      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+   616→        {/* Header */}
+   617→        <motion.div
+   618→          initial={{ opacity: 0, y: -10 }}
+   619→          animate={{ opacity: 1, y: 0 }}
+   620→          className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
+   621→        >
+   622→          <div>
+   623→            <h1 className="text-2xl font-bold text-white">Admin Dashboard</h1>
+   624→            <p className="text-gray-400 text-sm mt-0.5">
+   625→              Manage your categories and videos here
+   626→            </p>
+   627→          </div>
+   628→          <div className="flex items-center gap-2">
+   629→            <Button
+   630→              onClick={goHome}
+   631→              variant="outline"
+   632→              className="border-gray-700 hover:border-orange-500/50 hover:bg-orange-500/10 hover:text-orange-400 text-gray-300"
+   633→            >
+   634→              <ArrowLeft className="size-4" />
+   635→              <span className="hidden sm:inline">Home</span>
+   636→            </Button>
+   637→            <Button
+   638→              onClick={handleLogout}
+   639→              variant="outline"
+   640→              className="border-red-900/50 hover:border-red-500/50 hover:bg-red-500/10 hover:text-red-400 text-red-400"
+   641→            >
+   642→              <LogOut className="size-4" />
+   643→              <span className="hidden sm:inline">Logout</span>
+   644→            </Button>
+   645→          </div>
+   646→        </motion.div>
+   647→
+   648→        {/* Tabs */}
+   649→        <motion.div
+   650→          initial={{ opacity: 0, y: 10 }}
+   651→          animate={{ opacity: 1, y: 0 }}
+   652→          transition={{ delay: 0.1 }}
+   653→        >
+   654→          <Tabs defaultValue="categories" className="space-y-6">
+   655→            <TabsList className="bg-gray-900 border border-gray-800 w-full sm:w-auto">
+   656→              <TabsTrigger
+   657→                value="categories"
+   658→                className="data-[state=active]:bg-orange-500 data-[state=active]:text-white text-gray-400"
+   659→              >
+   660→                <FolderOpen className="size-4 mr-1.5" />
+   661→                <span className="hidden sm:inline">Categories</span>
+   662→              </TabsTrigger>
+   663→              <TabsTrigger
+   664→                value="videos"
+   665→                className="data-[state=active]:bg-orange-500 data-[state=active]:text-white text-gray-400"
+   666→              >
+   667→                <VideoIcon className="size-4 mr-1.5" />
+   668→                <span className="hidden sm:inline">Videos</span>
+   669→              </TabsTrigger>
+   670→              <TabsTrigger
+   671→                value="upload"
+   672→                className="data-[state=active]:bg-orange-500 data-[state=active]:text-white text-gray-400"
+   673→              >
+   674→                <Cloud className="size-4 mr-1.5" />
+   675→                <span className="hidden sm:inline">Upload</span>
+   676→              </TabsTrigger>
+   677→              <TabsTrigger
+   678→                value="account"
+   679→                className="data-[state=active]:bg-orange-500 data-[state=active]:text-white text-gray-400"
+   680→              >
+   681→                <CircleUserRound className="size-4 mr-1.5" />
+   682→                <span className="hidden sm:inline">Account</span>
+   683→              </TabsTrigger>
+   684→            </TabsList>
+   685→
+   686→            {/* ─── Categories Tab ──────────────────────────── */}
+   687→            <TabsContent value="categories">
+   688→              <div className="flex justify-end mb-4">
+   689→                <Button
+   690→                  onClick={openCategoryDialog}
+   691→                  className="bg-orange-500 hover:bg-orange-600 text-white"
+   692→                >
+   693→                  <Plus className="size-4" />
+   694→                  Add Category
+   695→                </Button>
+   696→              </div>
+   697→
+   698→              {categories.length === 0 ? (
+   699→                <div className="text-center py-12 border border-gray-800 rounded-xl bg-gray-900/50">
+   700→                  <FolderOpen className="size-10 text-gray-600 mx-auto mb-3" />
+   701→                  <p className="text-gray-400">No categories yet. Add your first category!</p>
+   702→                </div>
+   703→              ) : (
+   704→                <div className="border border-gray-800 rounded-xl overflow-hidden">
+   705→                  <Table>
+   706→                    <TableHeader>
+   707→                      <TableRow className="border-gray-800 hover:bg-gray-900/50">
+   708→                        <TableHead className="text-gray-300 font-semibold">Name</TableHead>
+   709→                        <TableHead className="text-gray-300 font-semibold">Slug</TableHead>
+   710→                        <TableHead className="text-right text-gray-300 font-semibold">Actions</TableHead>
+   711→                      </TableRow>
+   712→                    </TableHeader>
+   713→                    <TableBody>
+   714→                      {categories.map((cat) => (
+   715→                        <TableRow key={cat.id} className="border-gray-800 hover:bg-gray-900/50">
+   716→                          <TableCell className="text-white font-medium">{cat.name}</TableCell>
+   717→                          <TableCell className="text-gray-400 text-sm">{cat.slug}</TableCell>
+   718→                          <TableCell className="text-right">
+   719→                            <Button
+   720→                              onClick={() => handleDeleteCategory(cat.id)}
+   721→                              variant="ghost"
+   722→                              size="sm"
+   723→                              className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+   724→                            >
+   725→                              <Trash2 className="size-4" />
+   726→                            </Button>
+   727→                          </TableCell>
+   728→                        </TableRow>
+   729→                      ))}
+   730→                    </TableBody>
+   731→                  </Table>
+   732→                </div>
+   733→              )}
+   734→            </TabsContent>
+   735→
+   736→            {/* ─── Videos Tab ──────────────────────────────── */}
+   737→            <TabsContent value="videos">
+   738→              <div className="flex justify-end mb-4">
+   739→                <Button
+   740→                  onClick={() => openVideoDialog()}
+   741→                  className="bg-orange-500 hover:bg-orange-600 text-white"
+   742→                >
+   743→                  <Plus className="size-4" />
+   744→                  Add Video
+   745→                </Button>
+   746→              </div>
+   747→
+   748→              {videos.length === 0 ? (
+   749→                <div className="text-center py-12 border border-gray-800 rounded-xl bg-gray-900/50">
+   750→                  <VideoIcon className="size-10 text-gray-600 mx-auto mb-3" />
+   751→                  <p className="text-gray-400">No videos yet. Add your first video!</p>
+   752→                </div>
+   753→              ) : (
+   754→                <div className="border border-gray-800 rounded-xl overflow-hidden">
+   755→                  <Table>
+   756→                    <TableHeader>
+   757→                      <TableRow className="border-gray-800 hover:bg-gray-900/50">
+   758→                        <TableHead className="text-gray-300 font-semibold">Title</TableHead>
+   759→                        <TableHead className="text-gray-300 font-semibold hidden sm:table-cell">Category</TableHead>
+   760→                        <TableHead className="text-gray-300 font-semibold hidden md:table-cell">Featured</TableHead>
+   761→                        <TableHead className="text-gray-300 font-semibold hidden lg:table-cell">Views</TableHead>
+   762→                        <TableHead className="text-right text-gray-300 font-semibold">Actions</TableHead>
+   763→                      </TableRow>
+   764→                    </TableHeader>
+   765→                    <TableBody>
+   766→                      {videos.map((vid) => (
+   767→                        <TableRow key={vid.id} className="border-gray-800 hover:bg-gray-900/50">
+   768→                          <TableCell>
+   769→                            <div className="flex items-center gap-3 max-w-xs">
+   770→                              {vid.thumbnailUrl ? (
+   771→                                <img
+   772→                                  src={vid.thumbnailUrl}
+   773→                                  alt={vid.title}
+   774→                                  className="w-20 h-12 object-cover rounded-lg shrink-0 border border-gray-700"
+   775→                                  onError={(e) => {
+   776→                                    const target = e.target as HTMLImageElement
+   777→                                    target.style.display = 'none'
+   778→                                    target.nextElementSibling?.classList.remove('hidden')
+   779→                                  }}
+   780→                                />
+   781→                              ) : null}
+   782→                              <div className={`w-20 h-12 shrink-0 rounded-lg bg-gray-800 flex items-center justify-center border border-gray-700 ${vid.thumbnailUrl ? 'hidden' : ''}`}>
+   783→                                <VideoIcon className="size-5 text-gray-600" />
+   784→                              </div>
+   785→                              <div className="min-w-0">
+   786→                                <p className="text-white font-medium truncate">{vid.title}</p>
+   787→                                {vid.slug && (
+   788→                                  <p className="text-gray-500 text-xs truncate">/video/{vid.slug}</p>
+   789→                                )}
+   790→                              </div>
+   791→                            </div>
+   792→                          </TableCell>
+   793→                          <TableCell className="hidden sm:table-cell">
+   794→                            <Badge
+   795→                              variant="secondary"
+   796→                              className="bg-orange-500/10 text-orange-400 border-orange-500/20 text-xs"
+   797→                            >
+   798→                              {vid.category?.name || 'N/A'}
+   799→                            </Badge>
+   800→                          </TableCell>
+   801→                          <TableCell className="hidden md:table-cell">
+   802→                            <button
+   803→                              onClick={() => handleToggleFeatured(vid)}
+   804→                              className="cursor-pointer"
+   805→                            >
+   806→                              {vid.featured ? (
+   807→                                <Badge className="bg-orange-500 text-white border-orange-500 gap-1">
+   808→                                  <Star className="size-3 fill-white" />
+   809→                                  Yes
+   810→                                </Badge>
+   811→                              ) : (
+   812→                                <span className="text-gray-500 text-sm">No</span>
+   813→                              )}
+   814→                            </button>
+   815→                          </TableCell>
+   816→                          <TableCell className="hidden lg:table-cell text-gray-400">
+   817→                            {vid.views.toLocaleString()}
+   818→                          </TableCell>
+   819→                          <TableCell className="text-right">
+   820→                            <div className="flex items-center justify-end gap-1">
+   821→                              {vid.slug && (
+   822→                                <Button
+   823→                                  onClick={() => router.push(`/video/${vid.slug}`)}
+   824→                                  variant="ghost"
+   825→                                  size="sm"
+   826→                                  className="text-gray-400 hover:text-orange-400 hover:bg-orange-500/10"
+   827→                                  title="Open video"
+   828→                                >
+   829→                                  <ExternalLink className="size-4" />
+   830→                                </Button>
+   831→                              )}
+   832→                              <Button
+   833→                                onClick={() => openVideoDialog(vid)}
+   834→                                variant="ghost"
+   835→                                size="sm"
+   836→                                className="text-orange-400 hover:text-orange-300 hover:bg-orange-500/10"
+   837→                              >
+   838→                                <Pencil className="size-4" />
+   839→                              </Button>
+   840→                              <Button
+   841→                                onClick={() => handleDeleteVideo(vid.id)}
+   842→                                variant="ghost"
+   843→                                size="sm"
+   844→                                className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+   845→                              >
+   846→                                <Trash2 className="size-4" />
+   847→                              </Button>
+   848→                            </div>
+   849→                          </TableCell>
+   850→                        </TableRow>
+   851→                      ))}
+   852→                    </TableBody>
+   853→                  </Table>
+   854→                </div>
+   855→              )}
+   856→            </TabsContent>
+   857→
+   858→            {/* ─── Upload Tab (LuluStream) ─────────────────── */}
+   859→            <TabsContent value="upload">
+   860→              <div className="space-y-6">
+   861→
+   862→                {/* Upload Success Result */}
+   863→                {uploadResult ? (
+   864→                  <motion.div
+   865→                    initial={{ opacity: 0, scale: 0.95 }}
+   866→                    animate={{ opacity: 1, scale: 1 }}
+   867→                    className="rounded-xl border border-green-500/30 bg-green-500/5 p-6 space-y-4"
+   868→                  >
+   869→                    <div className="flex items-start gap-3">
+   870→                      <div className="bg-green-500/20 p-2 rounded-full mt-0.5">
+   871→                        <CheckCircle2 className="size-6 text-green-400" />
+   872→                      </div>
+   873→                      <div className="flex-1">
+   874→                        <h3 className="text-lg font-bold text-white">Upload Complete!</h3>
+   875→                        <p className="text-gray-400 text-sm mt-0.5">
+   876→                          Your video has been uploaded to LuluStream
+   877→                        </p>
+   878→                      </div>
+   879→                    </div>
+   880→
+   881→                    {/* Embed URL + Thumbnail preview */}
+   882→                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+   883→                      <div className="space-y-2">
+   884→                        <Label className="text-gray-300 text-sm">Embed URL</Label>
+   885→                        <div className="flex items-center gap-2">
+   886→                          <code className="flex-1 text-xs bg-gray-900 border border-gray-800 rounded-lg px-3 py-2 text-orange-400 break-all">
+   887→                            {uploadResult.embedUrl}
+   888→                          </code>
+   889→                          <Button
+   890→                            variant="outline"
+   891→                            size="sm"
+   892→                            onClick={() => {
+   893→                              navigator.clipboard.writeText(uploadResult.embedUrl)
+   894→                              toast.success('Embed URL copied!')
+   895→                            }}
+   896→                            className="border-gray-700 text-gray-300 hover:text-white shrink-0"
+   897→                          >
+   898→                            Copy
+   899→                          </Button>
+   900→                        </div>
+   901→                      </div>
+   902→                      <div className="space-y-2">
+   903→                        <Label className="text-gray-300 text-sm">Thumbnail</Label>
+   904→                        <div className="aspect-video rounded-lg overflow-hidden bg-gray-800 border border-gray-700">
+   905→                          <img
+   906→                            src={uploadResult.thumbnailUrl}
+   907→                            alt="Upload thumbnail"
+   908→                            className="w-full h-full object-cover"
+   909→                          />
+   910→                        </div>
+   911→                      </div>
+   912→                    </div>
+   913→
+   914→                    {/* Action buttons */}
+   915→                    <div className="flex flex-wrap items-center gap-3 pt-2">
+   916→                      <Button
+   917→                        onClick={() => openVideoDialogWithEmbed(uploadResult.embedUrl, uploadTitle, uploadResult.thumbnailUrl)}
+   918→                        className="bg-orange-500 hover:bg-orange-600 text-white"
+   919→                      >
+   920→                        <Plus className="size-4 mr-1.5" />
+   921→                        Add to YouFet
+   922→                      </Button>
+   923→                      <Button
+   924→                        variant="outline"
+   925→                        onClick={resetUpload}
+   926→                        className="border-gray-700 text-gray-300 hover:bg-gray-800"
+   927→                      >
+   928→                        <Upload className="size-4 mr-1.5" />
+   929→                        Upload Another
+   930→                      </Button>
+   931→                    </div>
+   932→                  </motion.div>
+   933→                ) : (
+   934→                  <>
+   935→                    {/* Upload Method Toggle */}
+   936→                    <div className="flex gap-2">
+   937→                      <Button
+   938→                        variant={uploadTab === 'file' ? 'default' : 'outline'}
+   939→                        onClick={() => setUploadTab('file')}
+   940→                        className={uploadTab === 'file'
+   941→                          ? 'bg-orange-500 hover:bg-orange-600 text-white'
+   942→                          : 'border-gray-700 text-gray-300 hover:bg-gray-800'
+   943→                        }
+   944→                      >
+   945→                        <Upload className="size-4 mr-1.5" />
+   946→                        Upload File
+   947→                      </Button>
+   948→                      <Button
+   949→                        variant={uploadTab === 'url' ? 'default' : 'outline'}
+   950→                        onClick={() => setUploadTab('url')}
+   951→                        className={uploadTab === 'url'
+   952→                          ? 'bg-orange-500 hover:bg-orange-600 text-white'
+   953→                          : 'border-gray-700 text-gray-300 hover:bg-gray-800'
+   954→                        }
+   955→                      >
+   956→                        <Link className="size-4 mr-1.5" />
+   957→                        Upload by URL
+   958→                      </Button>
+   959→                    </div>
+   960→
+   961→                    {/* Upload Progress */}
+   962→                    {uploading && (
+   963→                      <motion.div
+   964→                        initial={{ opacity: 0 }}
+   965→                        animate={{ opacity: 1 }}
+   966→                        className="space-y-3 rounded-xl border border-orange-500/30 bg-orange-500/5 p-5"
+   967→                      >
+   968→                        <div className="flex items-center gap-3">
+   969→                          <Loader2 className="size-5 text-orange-400 animate-spin" />
+   970→                          <span className="text-white font-medium">
+   971→                            {uploadTab === 'file' ? 'Uploading video...' : 'Processing remote upload...'}
+   972→                          </span>
+   973→                        </div>
+   974→                        <Progress value={uploadProgress} className="h-2" />
+   975→                        <p className="text-gray-400 text-xs">
+   976→                          Please wait, this may take a while depending on file size
+   977→                        </p>
+   978→                      </motion.div>
+   979→                    )}
+   980→
+   981→                    {/* File Upload */}
+   982→                    {uploadTab === 'file' && (
+   983→                      <div className="space-y-4">
+   984→                        {/* Title input */}
+   985→                        <div className="space-y-2">
+   986→                          <Label className="text-gray-300">Video Title (optional)</Label>
+   987→                          <Input
+   988→                            placeholder="Enter video title"
+   989→                            value={uploadTitle}
+   990→                            onChange={(e) => setUploadTitle(e.target.value)}
+   991→                            disabled={uploading}
+   992→                            className="bg-gray-900 border-gray-700 text-white placeholder:text-gray-500 focus-visible:border-orange-500 focus-visible:ring-orange-500/30"
+   993→                          />
+   994→                        </div>
+   995→
+   996→                        {/* Drop zone */}
+   997→                        <div
+   998→                          onDragOver={(e) => e.preventDefault()}
+   999→                          onDrop={handleDrop}
+  1000→                          onClick={() => !uploading && fileInputRef.current?.click()}
+  1001→                          className={`
+  1002→                            relative cursor-pointer rounded-xl border-2 border-dashed p-8 text-center transition-all
+  1003→                            ${uploadFile
+  1004→                              ? 'border-orange-500/50 bg-orange-500/5'
+  1005→                              : 'border-gray-700 hover:border-orange-500/30 hover:bg-gray-900/50'
+  1006→                            }
+  1007→                            ${uploading ? 'opacity-50 pointer-events-none' : ''}
+  1008→                          `}
+  1009→                        >
+  1010→                          <input
+  1011→                            ref={fileInputRef}
+  1012→                            type="file"
+  1013→                            accept="video/*,.mp4,.avi,.mkv,.webm,.flv,.mov,.wmv,.mpeg,.mpg,.3gp,.m4v"
+  1014→                            onChange={handleFileSelect}
+  1015→                            className="hidden"
+  1016→                          />
+  1017→                          {uploadFile ? (
+  1018→                            <div className="space-y-3">
+  1019→                              <FileVideo className="size-10 text-orange-400 mx-auto" />
+  1020→                              <div>
+  1021→                                <p className="text-white font-medium">{uploadFile.name}</p>
+  1022→                                <p className="text-gray-400 text-sm mt-1">
+  1023→                                  {(uploadFile.size / (1024 * 1024)).toFixed(1)} MB
+  1024→                                </p>
+  1025→                              </div>
+  1026→                              <p className="text-gray-500 text-xs">Click or drag to change file</p>
+  1027→                            </div>
+  1028→                          ) : (
+  1029→                            <div className="space-y-3">
+  1030→                              <Upload className="size-10 text-gray-500 mx-auto" />
+  1031→                              <div>
+  1032→                                <p className="text-gray-300 font-medium">
+  1033→                                  Drop video file here or click to browse
+  1034→                                </p>
+  1035→                                <p className="text-gray-500 text-sm mt-1">
+  1036→                                  MP4, AVI, MKV, WebM, MOV, WMV, etc.
+  1037→                                </p>
+  1038→                              </div>
+  1039→                            </div>
+  1040→                          )}
+  1041→                        </div>
+  1042→
+  1043→                        <Button
+  1044→                          onClick={handleFileUpload}
+  1045→                          disabled={!uploadFile || uploading}
+  1046→                          className="bg-orange-500 hover:bg-orange-600 text-white w-full sm:w-auto"
+  1047→                        >
+  1048→                          {uploading ? (
+  1049→                            <Loader2 className="size-4 animate-spin mr-2" />
+  1050→                          ) : (
+  1051→                            <Cloud className="size-4 mr-2" />
+  1052→                          )}
+  1053→                          Upload to LuluStream
+  1054→                        </Button>
+  1055→                      </div>
+  1056→                    )}
+  1057→
+  1058→                    {/* URL Upload */}
+  1059→                    {uploadTab === 'url' && (
+  1060→                      <div className="space-y-4">
+  1061→                        <div className="space-y-2">
+  1062→                          <Label className="text-gray-300">Remote Video URL</Label>
+  1063→                          <Input
+  1064→                            placeholder="https://example.com/video.mp4"
+  1065→                            value={uploadUrl}
+  1066→                            onChange={(e) => setUploadUrl(e.target.value)}
+  1067→                            disabled={uploading}
+  1068→                            className="bg-gray-900 border-gray-700 text-white placeholder:text-gray-500 focus-visible:border-orange-500 focus-visible:ring-orange-500/30"
+  1069→                          />
+  1070→                          <p className="text-xs text-gray-500">
+  1071→                            Enter a direct URL to a video file (MP4, AVI, MKV, etc.)
+  1072→                          </p>
+  1073→                        </div>
+  1074→
+  1075→                        <Button
+  1076→                          onClick={handleUrlUpload}
+  1077→                          disabled={!uploadUrl.trim() || uploading}
+  1078→                          className="bg-orange-500 hover:bg-orange-600 text-white w-full sm:w-auto"
+  1079→                        >
+  1080→                          {uploading ? (
+  1081→                            <Loader2 className="size-4 animate-spin mr-2" />
+  1082→                          ) : (
+  1083→                            <Cloud className="size-4 mr-2" />
+  1084→                          )}
+  1085→                          Upload to LuluStream
+  1086→                        </Button>
+  1087→                      </div>
+  1088→                    )}
+  1089→                  </>
+  1090→                )}
+  1091→
+  1092→                {/* Divider */}
+  1093→                <div className="relative">
+  1094→                  <div className="absolute inset-0 flex items-center">
+  1095→                    <span className="w-full border-t border-gray-800" />
+  1096→                  </div>
+  1097→                  <div className="relative flex justify-center text-xs">
+  1098→                    <span className="bg-gray-950 px-3 text-gray-500">or browse your LuluStream files</span>
+  1099→                  </div>
+  1100→                </div>
+  1101→
+  1102→                {/* LuluStream File Browser */}
+  1103→                <div className="space-y-4">
+  1104→                  <div className="flex items-center justify-between">
+  1105→                    <h3 className="text-sm font-semibold text-gray-300">
+  1106→                      <HardDrive className="size-4 inline mr-1.5" />
+  1107→                      Your LuluStream Files
+  1108→                    </h3>
+  1109→                    <Button
+  1110→                      variant="outline"
+  1111→                      size="sm"
+  1112→                      onClick={() => fetchLuluFiles()}
+  1113→                      disabled={luluFilesLoading}
+  1114→                      className="border-gray-700 text-gray-300 hover:bg-gray-800"
+  1115→                    >
+  1116→                      {luluFilesLoading ? (
+  1117→                        <Loader2 className="size-3.5 animate-spin mr-1" />
+  1118→                      ) : (
+  1119→                        <RefreshCw className="size-3.5 mr-1" />
+  1120→                      )}
+  1121→                      Refresh
+  1122→                    </Button>
+  1123→                  </div>
+  1124→
+  1125→                  {luluFilesLoading ? (
+  1126→                    <div className="space-y-2">
+  1127→                      {Array.from({ length: 3 }).map((_, i) => (
+  1128→                        <Skeleton key={i} className="h-16 w-full rounded-lg" />
+  1129→                      ))}
+  1130→                    </div>
+  1131→                  ) : luluFiles.length === 0 ? (
+  1132→                    <div
+  1133→                      className="text-center py-10 border border-gray-800 rounded-xl bg-gray-900/50 cursor-pointer hover:border-orange-500/30 transition-colors"
+  1134→                      onClick={() => fetchLuluFiles()}
+  1135→                    >
+  1136→                      <HardDrive className="size-8 text-gray-600 mx-auto mb-2" />
+  1137→                      <p className="text-gray-400 text-sm">Click to load your LuluStream files</p>
+  1138→                      {luluFilesTotal > 0 && (
+  1139→                        <p className="text-gray-500 text-xs mt-1">{luluFilesTotal} files total</p>
+  1140→                      )}
+  1141→                    </div>
+  1142→                  ) : (
+  1143→                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+  1144→                      {luluFiles.map((file) => {
+  1145→                        const embedUrl = `https://luluvid.com/e/${file.file_code}`
+  1146→                        const thumbnailUrl = `https://img.lulucdn.com/${file.file_code}.jpg`
+  1147→                        return (
+  1148→                          <div
+  1149→                            key={file.file_code}
+  1150→                            className="group rounded-lg border border-gray-800 bg-gray-900/50 overflow-hidden hover:border-orange-500/30 transition-all"
+  1151→                          >
+  1152→                            <div className="relative aspect-video bg-gray-800">
+  1153→                              <img
+  1154→                                src={file.thumbnail || thumbnailUrl}
+  1155→                                alt={file.title}
+  1156→                                className="w-full h-full object-cover"
+  1157→                              />
+  1158→                              <div className="absolute bottom-2 right-2">
+  1159→                                <Badge variant="secondary" className="bg-black/70 text-white text-[10px] border-0">
+  1160→                                  {Math.floor(Number(file.length) / 60)}:{String(Number(file.length) % 60).padStart(2, '0')}
+  1161→                                </Badge>
+  1162→                              </div>
+  1163→                            </div>
+  1164→                            <div className="p-3 space-y-2">
+  1165→                              <p className="text-white text-sm font-medium truncate">
+  1166→                                {file.title || file.file_code}
+  1167→                              </p>
+  1168→                              <div className="flex items-center gap-2 text-xs text-gray-500">
+  1169→                                <span>{file.views} views</span>
+  1170→                                <span>•</span>
+  1171→                                <span>{file.uploaded.split(' ')[0]}</span>
+  1172→                              </div>
+  1173→                              <Button
+  1174→                                size="sm"
+  1175→                                onClick={() => openVideoDialogWithEmbed(embedUrl, file.title, thumbnailUrl)}
+  1176→                                className="w-full bg-orange-500 hover:bg-orange-600 text-white h-8 text-xs"
+  1177→                              >
+  1178→                                <Plus className="size-3 mr-1" />
+  1179→                                Add to YouFet
+  1180→                              </Button>
+  1181→                            </div>
+  1182→                          </div>
+  1183→                        )
+  1184→                      })}
+  1185→                    </div>
+  1186→                  )}
+  1187→
+  1188→                  {/* Pagination */}
+  1189→                  {luluFilesTotal > 20 && (
+  1190→                    <div className="flex items-center justify-center gap-2">
+  1191→                      <Button
+  1192→                        variant="outline"
+  1193→                        size="sm"
+  1194→                        onClick={() => fetchLuluFiles(luluFilesPage - 1)}
+  1195→                        disabled={luluFilesPage <= 1 || luluFilesLoading}
+  1196→                        className="border-gray-700 text-gray-300"
+  1197→                      >
+  1198→                        Previous
+  1199→                      </Button>
+  1200→                      <span className="text-gray-400 text-sm">
+  1201→                        Page {luluFilesPage} of {Math.ceil(luluFilesTotal / 20)}
+  1202→                      </span>
+  1203→                      <Button
+  1204→                        variant="outline"
+  1205→                        size="sm"
+  1206→                        onClick={() => fetchLuluFiles(luluFilesPage + 1)}
+  1207→                        disabled={luluFilesPage >= Math.ceil(luluFilesTotal / 20) || luluFilesLoading}
+  1208→                        className="border-gray-700 text-gray-300"
+  1209→                      >
+  1210→                        Next
+  1211→                      </Button>
+  1212→                    </div>
+  1213→                  )}
+  1214→                </div>
+  1215→              </div>
+  1216→            </TabsContent>
+  1217→
+  1218→            {/* ─── Account Tab (LuluStream) ────────────────── */}
+  1219→            <TabsContent value="account">
+  1220→              <div className="space-y-6">
+  1221→                {/* Refresh Button */}
+  1222→                <div className="flex items-center justify-between">
+  1223→                  <h3 className="text-sm font-semibold text-gray-300">
+  1224→                    LuluStream Account Info
+  1225→                  </h3>
+  1226→                  <Button
+  1227→                    variant="outline"
+  1228→                    size="sm"
+  1229→                    onClick={fetchAccountInfo}
+  1230→                    disabled={accountLoading}
+  1231→                    className="border-gray-700 text-gray-300 hover:bg-gray-800"
+  1232→                  >
+  1233→                    {accountLoading ? (
+  1234→                      <Loader2 className="size-3.5 animate-spin mr-1" />
+  1235→                    ) : (
+  1236→                      <RefreshCw className="size-3.5 mr-1" />
+  1237→                    )}
+  1238→                    Refresh
+  1239→                  </Button>
+  1240→                </div>
+  1241→
+  1242→                {/* Loading State */}
+  1243→                {accountLoading && !accountInfo && (
+  1244→                  <div className="space-y-4">
+  1245→                    {Array.from({ length: 4 }).map((_, i) => (
+  1246→                      <Skeleton key={i} className="h-20 w-full rounded-xl" />
+  1247→                    ))}
+  1248→                  </div>
+  1249→                )}
+  1250→
+  1251→                {/* Error State */}
+  1252→                {accountError && !accountInfo && !accountLoading && (
+  1253→                  <div className="rounded-xl border border-red-500/30 bg-red-500/5 p-6 space-y-3">
+  1254→                    <div className="flex items-start gap-3">
+  1255→                      <div className="bg-red-500/20 p-2 rounded-full mt-0.5">
+  1256→                        <AlertCircle className="size-5 text-red-400" />
+  1257→                      </div>
+  1258→                      <div className="flex-1">
+  1259→                        <h3 className="text-white font-semibold">Connection Error</h3>
+  1260→                        <p className="text-gray-400 text-sm mt-1">{accountError}</p>
+  1261→                        <p className="text-gray-500 text-xs mt-2">
+  1262→                          Check that your LuluStream API key is valid and the service is accessible.
+  1263→                        </p>
+  1264→                      </div>
+  1265→                    </div>
+  1266→                  </div>
+  1267→                )}
+  1268→
+  1269→                {/* Account Info Cards */}
+  1270→                {accountInfo && !accountLoading && (
+  1271→                  <motion.div
+  1272→                    initial={{ opacity: 0, y: 10 }}
+  1273→                    animate={{ opacity: 1, y: 0 }}
+  1274→                    className="space-y-4"
+  1275→                  >
+  1276→                    {/* Status Banner */}
+  1277→                    <div className={accountInfo.premium === 1
+  1278→                      ? 'rounded-xl border p-4 border-yellow-500/30 bg-yellow-500/5'
+  1279→                      : 'rounded-xl border p-4 border-gray-700 bg-gray-900/50'
+  1280→                    }>
+  1281→                      <div className="flex items-center gap-3">
+  1282→                        <div className={accountInfo.premium === 1
+  1283→                          ? 'p-2 rounded-full bg-yellow-500/20'
+  1284→                          : 'p-2 rounded-full bg-gray-800'
+  1285→                        }>
+  1286→                          <CircleUserRound className={accountInfo.premium === 1
+  1287→                            ? 'size-6 text-yellow-400'
+  1288→                            : 'size-6 text-gray-400'
+  1289→                          } />
+  1290→                        </div>
+  1291→                        <div className="flex-1">
+  1292→                          <div className="flex items-center gap-2">
+  1293→                            <h3 className="text-white font-bold text-lg">{accountInfo.login}</h3>
+  1294→                            {accountInfo.premium === 1 && (
+  1295→                              <Badge className="bg-yellow-500 text-black border-yellow-500 gap-1">
+  1296→                                <Crown className="size-3" />
+  1297→                                Premium
+  1298→                              </Badge>
+  1299→                            )}
+  1300→                            {accountInfo.premium !== 1 && (
+  1301→                              <Badge variant="secondary" className="bg-gray-800 text-gray-400 border-gray-700">
+  1302→                                Free
+  1303→                              </Badge>
+  1304→                            )}
+  1305→                          </div>
+  1306→                          <p className="text-gray-400 text-sm">{accountInfo.email}</p>
+  1307→                        </div>
+  1308→                      </div>
+  1309→                      {accountInfo.premium === 1 && accountInfo.premium_expire && (
+  1310→                        <div className="mt-3 flex items-center gap-2 text-sm">
+  1311→                          <Clock className="size-3.5 text-yellow-500" />
+  1312→                          <span className="text-gray-400">
+  1313→                            Premium expires:{' '}
+  1314→                            <span className="text-yellow-400 font-medium">
+  1315→                              {new Date(accountInfo.premium_expire).toLocaleDateString('en-US', {
+  1316→                                year: 'numeric', month: 'long', day: 'numeric'
+  1317→                              })}
+  1318→                            </span>
+  1319→                          </span>
+  1320→                        </div>
+  1321→                      )}
+  1322→                    </div>
+  1323→
+  1324→                    {/* Info Grid */}
+  1325→                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+  1326→                      {/* Storage Used */}
+  1327→                      <div className="rounded-xl border border-gray-800 bg-gray-900/50 p-4 space-y-2">
+  1328→                        <div className="flex items-center gap-2 text-gray-400">
+  1329→                          <Database className="size-4" />
+  1330→                          <span className="text-xs font-medium uppercase tracking-wide">Storage Used</span>
+  1331→                        </div>
+  1332→                        <p className="text-2xl font-bold text-white">{accountInfo.storage_used}</p>
+  1333→                        <p className="text-xs text-gray-500">of {accountInfo.storage_left} remaining</p>
+  1334→                      </div>
+  1335→
+  1336→                      {/* Files Total */}
+  1337→                      <div className="rounded-xl border border-gray-800 bg-gray-900/50 p-4 space-y-2">
+  1338→                        <div className="flex items-center gap-2 text-gray-400">
+  1339→                          <FileVideo className="size-4" />
+  1340→                          <span className="text-xs font-medium uppercase tracking-wide">Total Files</span>
+  1341→                        </div>
+  1342→                        <p className="text-2xl font-bold text-white">{accountInfo.files_total}</p>
+  1343→                        <p className="text-xs text-gray-500">files hosted on LuluStream</p>
+  1344→                      </div>
+  1345→
+  1346→                      {/* Balance */}
+  1347→                      <div className="rounded-xl border border-gray-800 bg-gray-900/50 p-4 space-y-2">
+  1348→                        <div className="flex items-center gap-2 text-gray-400">
+  1349→                          <DollarSign className="size-4" />
+  1350→                          <span className="text-xs font-medium uppercase tracking-wide">Balance</span>
+  1351→                        </div>
+  1352→                        <p className="text-2xl font-bold text-white">{'$'}{accountInfo.balance}</p>
+  1353→                        <p className="text-xs text-gray-500">account balance</p>
+  1354→                      </div>
+  1355→                    </div>
+  1356→
+  1357→                    {/* API Key Info */}
+  1358→                    <div className="rounded-xl border border-gray-800 bg-gray-900/50 p-4 space-y-2">
+  1359→                      <div className="flex items-center gap-2 text-gray-400">
+  1360→                        <HardDrive className="size-4" />
+  1361→                        <span className="text-xs font-medium uppercase tracking-wide">API Configuration</span>
+  1362→                      </div>
+  1363→                      <div className="flex items-center gap-2 mt-1">
+  1364→                        <CheckCircle2 className="size-4 text-green-400" />
+  1365→                        <span className="text-green-400 text-sm font-medium">API Connected</span>
+  1366→                      </div>
+  1367→                      <p className="text-gray-500 text-xs mt-1">
+  1368→                        Your LuluStream API key is configured and connected.
+  1369→                      </p>
+  1370→                    </div>
+  1371→                  </motion.div>
+  1372→                )}
+  1373→
+  1374→                {/* Initial empty state */}
+  1375→                {!accountInfo && !accountLoading && !accountError && (
+  1376→                  <div className="text-center py-12 border border-gray-800 rounded-xl bg-gray-900/50">
+  1377→                    <CircleUserRound className="size-10 text-gray-600 mx-auto mb-3" />
+  1378→                    <p className="text-gray-400">Click "Refresh" to load your LuluStream account info</p>
+  1379→                  </div>
+  1380→                )}
+  1381→              </div>
+  1382→            </TabsContent>
+  1383→          </Tabs>
+  1384→        </motion.div>
+  1385→      </div>
+  1386→
+  1387→      {/* ─── Category Dialog ─────────────────────────────── */}
+  1388→      <Dialog open={catDialogOpen} onOpenChange={setCatDialogOpen}>
+  1389→        <DialogContent className="bg-gray-950 border-gray-800 sm:max-w-md">
+  1390→          <DialogHeader>
+  1391→            <DialogTitle className="text-white">Add Category</DialogTitle>
+  1392→            <DialogDescription className="text-gray-400">
+  1393→              Create a new category to organize your videos
+  1394→            </DialogDescription>
+  1395→          </DialogHeader>
+  1396→          <div className="space-y-4 py-2">
+  1397→            <div className="space-y-2">
+  1398→              <Label className="text-gray-300">Category Name</Label>
+  1399→              <Input
+  1400→                placeholder="e.g. Music, Gaming, Education"
+  1401→                value={catForm.name}
+  1402→                onChange={(e) => setCatForm({ name: e.target.value })}
+  1403→                onKeyDown={(e) => e.key === 'Enter' && handleCreateCategory()}
+  1404→                className="bg-gray-900 border-gray-700 text-white placeholder:text-gray-500 focus-visible:border-orange-500 focus-visible:ring-orange-500/30"
+  1405→              />
+  1406→            </div>
+  1407→          </div>
+  1408→          <DialogFooter>
+  1409→            <Button
+  1410→              variant="outline"
+  1411→              onClick={() => setCatDialogOpen(false)}
+  1412→              className="border-gray-700 text-gray-300 hover:bg-gray-800"
+  1413→            >
+  1414→              Cancel
+  1415→            </Button>
+  1416→            <Button
+  1417→              onClick={handleCreateCategory}
+  1418→              className="bg-orange-500 hover:bg-orange-600 text-white"
+  1419→            >
+  1420→              Create Category
+  1421→            </Button>
+  1422→          </DialogFooter>
+  1423→        </DialogContent>
+  1424→      </Dialog>
+  1425→
+  1426→      {/* ─── Video Dialog ────────────────────────────────── */}
+  1427→      <Dialog open={videoDialogOpen} onOpenChange={setVideoDialogOpen}>
+  1428→        <DialogContent className="bg-gray-950 border-gray-800 sm:max-w-lg max-h-[90vh] overflow-y-auto">
+  1429→          <DialogHeader>
+  1430→            <DialogTitle className="text-white">
+  1431→              {editingVideoId ? 'Edit Video' : 'Add Video'}
+  1432→            </DialogTitle>
+  1433→            <DialogDescription className="text-gray-400">
+  1434→              {editingVideoId
+  1435→                ? 'Update existing video information'
+  1436→                : 'Fill in the details to add a new video'}
+  1437→            </DialogDescription>
+  1438→          </DialogHeader>
+  1439→          <div className="space-y-4 py-2">
+  1440→            <div className="space-y-2">
+  1441→              <Label className="text-gray-300">Video Title</Label>
+  1442→              <Input
+  1443→                placeholder="Enter video title"
+  1444→                value={videoForm.title}
+  1445→                onChange={(e) => {
+  1446→                  const newTitle = e.target.value
+  1447→                  setVideoForm((f) => ({
+  1448→                    ...f,
+  1449→                    title: newTitle,
+  1450→                    slug: !editingVideoId
+  1451→                      ? newTitle.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').replace(/-+/g, '-')
+  1452→                      : f.slug,
+  1453→                  }))
+  1454→                }}
+  1455→                className="bg-gray-900 border-gray-700 text-white placeholder:text-gray-500 focus-visible:border-orange-500 focus-visible:ring-orange-500/30"
+  1456→              />
+  1457→            </div>
+  1458→
+  1459→            {/* Slug field */}
+  1460→            <div className="space-y-2">
+  1461→              <Label className="text-gray-300">URL Slug</Label>
+  1462→              <div className="relative">
+  1463→                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm pointer-events-none">
+  1464→                  /video/
+  1465→                </span>
+  1466→                <Input
+  1467→                  placeholder="auto-from-title"
+  1468→                  value={videoForm.slug}
+  1469→                  onChange={(e) =>
+  1470→                    setVideoForm((f) => ({ ...f, slug: e.target.value }))
+  1471→                  }
+  1472→                  className="bg-gray-900 border-gray-700 text-white placeholder:text-gray-600 focus-visible:border-orange-500 focus-visible:ring-orange-500/30 pl-16"
+  1473→                />
+  1474→              </div>
+  1475→              <p className="text-xs text-gray-500">
+  1476→                Leave empty to auto-generate from title. Example: youfet.site/video/april-mei
+  1477→              </p>
+  1478→            </div>
+  1479→
+  1480→            <div className="space-y-2">
+  1481→              <Label className="text-gray-300">Description</Label>
+  1482→              <Textarea
+  1483→                placeholder="Brief description of this video (optional)"
+  1484→                value={videoForm.description}
+  1485→                onChange={(e) =>
+  1486→                  setVideoForm((f) => ({ ...f, description: e.target.value }))
+  1487→                }
+  1488→                className="bg-gray-900 border-gray-700 text-white placeholder:text-gray-500 focus-visible:border-orange-500 focus-visible:ring-orange-500/30 min-h-20"
+  1489→              />
+  1490→            </div>
+  1491→
+  1492→            <div className="space-y-2">
+  1493→              <Label className="text-gray-300">URL Embed</Label>
+  1494→              <Input
+  1495→                placeholder="https://www.youtube.com/embed/... or https://luluvid.com/e/xxx"
+  1496→                value={videoForm.embedUrl}
+  1497→                onChange={(e) =>
+  1498→                  setVideoForm((f) => ({ ...f, embedUrl: e.target.value }))
+  1499→                }
+  1500→                className="bg-gray-900 border-gray-700 text-white placeholder:text-gray-500 focus-visible:border-orange-500 focus-visible:ring-orange-500/30"
+  1501→              />
+  1502→              <p className="text-xs text-gray-500">
+  1503→                Use an embed URL from YouTube, LuluStream, or other video platforms
+  1504→              </p>
+  1505→            </div>
+  1506→
+  1507→            {/* ── Thumbnail Section ── */}
+  1508→            <div className="space-y-3 rounded-lg border border-gray-800 p-4 bg-gray-900/50">
+  1509→              <div className="flex items-center justify-between">
+  1510→                <Label className="text-gray-300 flex items-center gap-2">
+  1511→                  <ImageIcon className="size-4" />
+  1512→                  Thumbnail
+  1513→                </Label>
+  1514→                <Button
+  1515→                  type="button"
+  1516→                  variant="outline"
+  1517→                  size="sm"
+  1518→                  onClick={handleGenerateThumbnail}
+  1519→                  disabled={generatingThumbnail || !videoForm.embedUrl.trim()}
+  1520→                  className="border-gray-700 text-gray-300 hover:bg-orange-500/10 hover:border-orange-500/50 hover:text-orange-400 text-xs h-7"
+  1521→                >
+  1522→                  {generatingThumbnail ? (
+  1523→                    <Loader2 className="size-3 animate-spin mr-1" />
+  1524→                  ) : (
+  1525→                    <RefreshCw className="size-3 mr-1" />
+  1526→                  )}
+  1527→                  Auto Generate
+  1528→                </Button>
+  1529→              </div>
+  1530→
+  1531→              {thumbnailPreview ? (
+  1532→                <div className="relative aspect-video rounded-lg overflow-hidden bg-gray-800 border border-gray-700">
+  1533→                  <img
+  1534→                    src={thumbnailPreview}
+  1535→                    alt="Thumbnail preview"
+  1536→                    className="w-full h-full object-cover"
+  1537→                    onError={(e) => {
+  1538→                      const target = e.target as HTMLImageElement
+  1539→                      target.style.display = 'none'
+  1540→                    }}
+  1541→                  />
+  1542→                  <button
+  1543→                    type="button"
+  1544→                    onClick={() => {
+  1545→                      setVideoForm((f) => ({ ...f, thumbnailUrl: '' }))
+  1546→                      setThumbnailPreview(null)
+  1547→                    }}
+  1548→                    className="absolute top-2 right-2 bg-black/60 hover:bg-red-500/80 text-white rounded-full p-1 transition-colors cursor-pointer"
+  1549→                    title="Remove thumbnail"
+  1550→                  >
+  1551→                    <Trash2 className="size-3.5" />
+  1552→                  </button>
+  1553→                </div>
+  1554→              ) : (
+  1555→                <div className="aspect-video rounded-lg bg-gray-800/50 border border-dashed border-gray-700 flex flex-col items-center justify-center gap-1.5">
+  1556→                  <ImageIcon className="size-6 text-gray-600" />
+  1557→                  <p className="text-xs text-gray-500">
+  1558→                    {videoForm.embedUrl.trim()
+  1559→                      ? 'Click "Auto Generate" to create a thumbnail'
+  1560→                      : 'Enter an embed URL first'}
+  1561→                  </p>
+  1562→                </div>
+  1563→              )}
+  1564→
+  1565→              <div className="space-y-1.5">
+  1566→                <Input
+  1567→                  placeholder="Or paste a manual image URL..."
+  1568→                  value={videoForm.thumbnailUrl}
+  1569→                  onChange={(e) => {
+  1570→                    const val = e.target.value
+  1571→                    setVideoForm((f) => ({ ...f, thumbnailUrl: val }))
+  1572→                    if (val.trim()) setThumbnailPreview(val.trim())
+  1573→                    else setThumbnailPreview(null)
+  1574→                  }}
+  1575→                  className="bg-gray-800 border-gray-700 text-white text-sm placeholder:text-gray-600 focus-visible:border-orange-500 focus-visible:ring-orange-500/30 h-8"
+  1576→                />
+  1577→                <p className="text-[11px] text-gray-600">
+  1578→                  Optional. Leave empty to auto-generate from embed URL.
+  1579→                </p>
+  1580→              </div>
+  1581→            </div>
+  1582→
+  1583→            <div className="space-y-2">
+  1584→              <Label className="text-gray-300">Category</Label>
+  1585→              <Select
+  1586→                value={videoForm.categoryId}
+  1587→                onValueChange={(val) =>
+  1588→                  setVideoForm((f) => ({ ...f, categoryId: val }))
+  1589→                }
+  1590→              >
+  1591→                <SelectTrigger className="w-full bg-gray-900 border-gray-700 text-white focus:ring-orange-500/30 focus:border-orange-500">
+  1592→                  <SelectValue placeholder="Select category" />
+  1593→                </SelectTrigger>
+  1594→                <SelectContent className="bg-gray-900 border-gray-700">
+  1595→                  {categories.map((cat) => (
+  1596→                    <SelectItem
+  1597→                      key={cat.id}
+  1598→                      value={cat.id}
+  1599→                      className="text-gray-200 focus:bg-orange-500/10 focus:text-orange-400"
+  1600→                    >
+  1601→                      {cat.name}
+  1602→                    </SelectItem>
+  1603→                  ))}
+  1604→                </SelectContent>
+  1605→              </Select>
+  1606→            </div>
+  1607→
+  1608→            <div className="flex items-center justify-between rounded-lg border border-gray-800 p-3 bg-gray-900/50">
+  1609→              <div className="space-y-0.5">
+  1610→                <Label className="text-gray-300 text-sm">Featured Video</Label>
+  1611→                <p className="text-xs text-gray-500">Display as a featured video</p>
+  1612→              </div>
+  1613→              <Switch
+  1614→                checked={videoForm.featured}
+  1615→                onCheckedChange={(checked) =>
+  1616→                  setVideoForm((f) => ({ ...f, featured: checked }))
+  1617→                }
+  1618→                className="data-[state=checked]:bg-orange-500"
+  1619→              />
+  1620→            </div>
+  1621→          </div>
+  1622→          <DialogFooter>
+  1623→            <Button
+  1624→              variant="outline"
+  1625→              onClick={() => setVideoDialogOpen(false)}
+  1626→              className="border-gray-700 text-gray-300 hover:bg-gray-800"
+  1627→            >
+  1628→              Cancel
+  1629→            </Button>
+  1630→            <Button
+  1631→              onClick={handleSaveVideo}
+  1632→              className="bg-orange-500 hover:bg-orange-600 text-white"
+  1633→            >
+  1634→              {editingVideoId ? 'Save Changes' : 'Create Video'}
+  1635→            </Button>
+  1636→          </DialogFooter>
+  1637→        </DialogContent>
+  1638→      </Dialog>
+  1639→    </div>
+  1640→  )
+  1641→}
+  1642→

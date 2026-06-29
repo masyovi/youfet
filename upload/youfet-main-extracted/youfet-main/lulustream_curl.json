@@ -1,0 +1,92 @@
+[
+  {
+    "url": "https://api.video/blog/tutorials/video-upload-tutorial",
+    "name": "Video upload with cURL - api.video",
+    "snippet": "This tutorial uses curl and HTTP requests to authenticate your session, create a video, and then upload the video. This example works for smaller videos, but as ...",
+    "host_name": "api.video",
+    "rank": 0,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://qmacro.org/blog/posts/2021/03/30/two-phase-video-uploads-with-youtube-api-and-curl",
+    "name": "Two-phase video uploads with YouTube API and curl - DJ Adams",
+    "snippet": "TIL how to use the YouTube API to upload a video, with curl , using a two-phase approach. ... Here's a brief example based on a throwaway script I ...",
+    "host_name": "qmacro.org",
+    "rank": 1,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://support.bunny.net/hc/en-us/articles/360021070999-Uploading-videos-through-our-HTTP-API",
+    "name": "Uploading videos through our HTTP API - bunny.net Support Hub",
+    "snippet": "This guide provides a step-by-step overview of how to upload videos to Bunny Stream using the HTTP API.From creating the video object to...",
+    "host_name": "support.bunny.net",
+    "rank": 2,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://apis.support.brightcove.com/dynamic-ingest/getting-started/source-file-upload-api-dynamic-ingest.html",
+    "name": "Source File Upload API for Dynamic Ingest - Brightcove APIs",
+    "snippet": "In this topic, you will learn how to add videos to your Video Cloud account using the Source File Upload API for Dynamic Ingest. The Source File Upload API ...",
+    "host_name": "apis.support.brightcove.com",
+    "rank": 3,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://developer.wowza.com/docs/wowza-video/guides/videos/upload-a-video-locally",
+    "name": "Upload a video from local storage to Wowza Video with the Wowza",
+    "snippet": "This article demonstrates how to upload .mp4 files stored on your local computer to Wowza Video using the Wowza Video REST API. Info.",
+    "host_name": "developer.wowza.com",
+    "rank": 4,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://stackoverflow.com/questions/35138884/how-to-upload-video-to-brightcove-through-api-with-php-and-curl",
+    "name": "How to upload video to Brightcove through API with PHP and Curl",
+    "snippet": "Sorted it in the end, json had to be one parameter and then file had to be another like so: Copy. $data = array( 'method' => \"create_video\", ...",
+    "host_name": "stackoverflow.com",
+    "rank": 5,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://gist.github.com/tanaikech/5f3ce2d002e1b8e5916821ecc1dacbdc",
+    "name": "Curl Command Uploading Video File to YouTube with Resumable",
+    "snippet": "This is a sample curl command for uploading a video file to YouTube with the resumable upload using YouTube API.",
+    "host_name": "gist.github.com",
+    "rank": 6,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://developers.cloudflare.com/stream/get-started",
+    "name": "Get started · Cloudflare Stream docs",
+    "snippet": "Step 1: Upload an example video from a public URL. You can upload videos using the API or directly on the Stream page of the Cloudflare ...",
+    "host_name": "developers.cloudflare.com",
+    "rank": 7,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.youtube.com/watch?v=fVmHqtjFzbA",
+    "name": "CURL API Testing Tutorial : How to Use CURL to Send API Requests?",
+    "snippet": "In this curl api testing tutorial, We are going to lean how you can make the HTTP Method GET,POST,PUT,PATCH and Delete Request with CURL ...",
+    "host_name": "www.youtube.com",
+    "rank": 8,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://help.opus.pro/api-reference/endpoints/upload-video-create-project",
+    "name": "Upload Video and Create Clip Project - Opus Clip",
+    "snippet": "This guide outlines the step-by-step process to upload a video file to Google Cloud Storage (GCS) using the Opus API and subsequently create a clip project.",
+    "host_name": "help.opus.pro",
+    "rank": 9,
+    "date": "",
+    "favicon": ""
+  }
+]

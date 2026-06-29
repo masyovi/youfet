@@ -1,0 +1,92 @@
+[
+  {
+    "url": "https://stackoverflow.com/questions/68995810/handling-large-file-uploads-and-sending-to-api",
+    "name": "Handling large file uploads and sending to API - Stack Overflow",
+    "snippet": "I'm stuck wondering what the best solution is to handling large file uploads and sending them to a third-party API.",
+    "host_name": "stackoverflow.com",
+    "rank": 0,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://apis.support.brightcove.com/dynamic-ingest/getting-started/source-file-upload-api-dynamic-ingest.html",
+    "name": "Source File Upload API for Dynamic Ingest - Brightcove APIs",
+    "snippet": "The Source File Upload API provides the ability to upload (“push”) source files into Video Cloud via Dynamic Ingest.",
+    "host_name": "apis.support.brightcove.com",
+    "rank": 1,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://cloud.telestream.net/flip/docs/v2",
+    "name": "Flip Service API Documentation",
+    "snippet": "Creates an upload session and returns its unique endpoint location, which can be used to upload multimedia file in chunks using upload API . Required parameters ...",
+    "host_name": "cloud.telestream.net",
+    "rank": 2,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.facebook.com/groups/1143806967526688/posts/1453095549931160",
+    "name": "Uploading files to api endpoint and creating videos - Facebook",
+    "snippet": "I have a private server receiver, API endpoint 101/M1 fund.. Upload the file to the API endpoint of the sender receiver and make a video.",
+    "host_name": "www.facebook.com",
+    "rank": 3,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.youtube.com/watch?v=ArIzOjsuubI",
+    "name": "Uploading files to the cloud with StorageLink via API - YouTube",
+    "snippet": "We'll show you how to upload files to cloud storage locations using StorageLink via the API. StorageLink allows users to access cloud ...",
+    "host_name": "www.youtube.com",
+    "rank": 4,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://blog.filestack.com/file-upload-api-guide",
+    "name": "File Upload APIs in 2026: Patterns, Security & Provider Comparison",
+    "snippet": "Learn how file upload APIs work, compare upload patterns, security best practices, top providers, and build vs buy options for modern apps ...",
+    "host_name": "blog.filestack.com",
+    "rank": 5,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://docs.saucelabs.com/testfairy/api-reference/upload-api",
+    "name": "Upload API - Sauce Labs Documentation",
+    "snippet": "Upload API. Streamline your build process and upload APKs or IPAs directly to Sauce Labs Mobile App Distribution.",
+    "host_name": "docs.saucelabs.com",
+    "rank": 6,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://community.cloudflare.com/t/stream-upload-with-api-token/114830",
+    "name": "Stream upload with API token - Cloudflare Community",
+    "snippet": "Hello, I have an application uploading videos to Cloudflare Stream. Everything works great, but I'm using a Global API Key in the ...",
+    "host_name": "community.cloudflare.com",
+    "rank": 7,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://api.video/blog/tutorials/video-upload-tutorial",
+    "name": "Video upload with cURL - api.video",
+    "snippet": "You can find your API key on your dashboard. This tutorial uses the sandbox endpoint. To upload your video in production, simply replace all sandbox.api.video ...",
+    "host_name": "api.video",
+    "rank": 8,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://backendless.com/how-to-upload-files-to-server-with-file-upload-api",
+    "name": "How to Upload Files to the Server With the File Upload API",
+    "snippet": "There are several ways to upload file content to the server. In this article, we will review the first option – uploading a file with the API.",
+    "host_name": "backendless.com",
+    "rank": 9,
+    "date": "",
+    "favicon": ""
+  }
+]

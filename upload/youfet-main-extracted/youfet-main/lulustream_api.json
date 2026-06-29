@@ -1,0 +1,92 @@
+[
+  {
+    "url": "https://developer.vimeo.com/api/upload/videos",
+    "name": "Working with Video Uploads - Vimeo Developer API",
+    "snippet": "Here are step-by-step instructions for uploading videos through the API and managing related tasks.",
+    "host_name": "developer.vimeo.com",
+    "rank": 0,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://apis.support.brightcove.com/dynamic-ingest/getting-started/source-file-upload-api-dynamic-ingest.html",
+    "name": "Source File Upload API for Dynamic Ingest - Brightcove APIs",
+    "snippet": "The Source File Upload API provides the ability to upload (“push”) source files into Video Cloud via Dynamic Ingest.",
+    "host_name": "apis.support.brightcove.com",
+    "rank": 1,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.reddit.com/r/selfhosted/comments/8kpusu/selfhosted_private_videos_with_api_and_embed",
+    "name": "Self-hosted private videos with API and embed function - Reddit",
+    "snippet": "I want to host many videos so I can embed them on my blog. I will write an automated script that will upload videos and posted embed code into my blog, so API ...",
+    "host_name": "www.reddit.com",
+    "rank": 2,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://api.video",
+    "name": "api.video | API to host, manage and deliver videos",
+    "snippet": "api.video lets you quickly and securely deliver on-demand and live-stream videos directly from your website, software, or app.",
+    "host_name": "api.video",
+    "rank": 3,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://developers.cloudflare.com/api/resources/stream/subresources/copy/methods/create",
+    "name": "Upload videos from a URL | Cloudflare API",
+    "snippet": "Embed Embed. Retrieve embed Code HTML · Token Token. Create signed URL tokens for videos. Networking. DDoS Protection DDoS Protection. Advanced TCP Protection ...",
+    "host_name": "developers.cloudflare.com",
+    "rank": 4,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://support.ruzuku.com/article/908-embed-content-like-videos-into-your-lessons",
+    "name": "Embed videos and external content - Ruzuku Knowledge Base",
+    "snippet": "In the lesson editor, click the Add media dropdown and select HTML or embed code. Paste the embed code you copied from your video platform ( ...",
+    "host_name": "support.ruzuku.com",
+    "rank": 5,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://stackoverflow.com/questions/17791448/retrieve-instagram-video-embed-url-from-api",
+    "name": "Retrieve Instagram video embed URL from API - Stack Overflow",
+    "snippet": "An easy way to get the Instagram Video URL is to add ?__a=1 at the end of the post you're trying to target.",
+    "host_name": "stackoverflow.com",
+    "rank": 6,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://docs.dacast.com/docs/embed-codes",
+    "name": "Embed Codes - Why Should I Use It? - Dacast",
+    "snippet": "There is a pair of endpoints for each of these content types that you can use to generate the embed codes for your video - one for Javascript and one for iFrame ...",
+    "host_name": "docs.dacast.com",
+    "rank": 7,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://cloudinary.com/documentation/image_upload_api_reference",
+    "name": "Upload API Reference | Documentation - Cloudinary",
+    "snippet": "The Upload API is a rate-unlimited RESTful API that enables you to upload your media assets (resources) and provides a wide range of functionality.",
+    "host_name": "cloudinary.com",
+    "rank": 8,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://lmstudio.ai/docs/developer/rest/endpoints",
+    "name": "REST API v0 - LM Studio",
+    "snippet": "The REST API includes enhanced stats such as Token / Second and Time To First Token (TTFT), as well as rich information about models such as loaded vs unloaded, ...",
+    "host_name": "lmstudio.ai",
+    "rank": 9,
+    "date": "",
+    "favicon": ""
+  }
+]

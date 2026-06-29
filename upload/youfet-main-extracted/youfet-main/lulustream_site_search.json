@@ -1,0 +1,92 @@
+[
+  {
+    "url": "https://www.bankofapis.com/products/ecm-document-upload-api/documentation",
+    "name": "Document Upload | Product Documentation - Bank of APIs",
+    "snippet": "Our Document Upload API allows storage of a wide-range of documents within our document repository. The API is available for both NatWest Group applications and ...",
+    "host_name": "www.bankofapis.com",
+    "rank": 0,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://developers.notion.com/reference/upload-file",
+    "name": "Send a file upload - Notion Docs",
+    "snippet": "Use this API to transmit file contents to Notion for a file upload.",
+    "host_name": "developers.notion.com",
+    "rank": 1,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://docs.immport.org/apidocumentation/datasubmissionapi/datauploadapi/api",
+    "name": "API Format and Endpoints - ImmPort Documentation",
+    "snippet": "Posting uploads/validation and acquiring information about them in the Data Upload API is accomplished by making calls to the API endpoints. The HTTP URL that ...",
+    "host_name": "docs.immport.org",
+    "rank": 2,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/answers/questions/2285530/how-to-send-user-uploaded-file-to-custom-rest-api",
+    "name": "How to send user uploaded file to custom Rest API endpoint?",
+    "snippet": "A user would select a starter prompt for a specific task, upload a file and then the agent will send an HTTP request containing the starter prompt and the file ...",
+    "host_name": "learn.microsoft.com",
+    "rank": 3,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://developers.openai.com/api/reference/resources/files/methods/create",
+    "name": "Upload file | OpenAI API Reference",
+    "snippet": "Upload a file that can be used across various endpoints. Individual files can be up to 512 MB, and each project can store up to 2.5 TB of files in total.",
+    "host_name": "developers.openai.com",
+    "rank": 4,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://wiki.cobblestonesoftware.com/docs/file-upload-endpoint-post",
+    "name": "File Upload Endpoint (POST) - CobbleStone Software",
+    "snippet": "File Upload Endpoint is designed to allow clients to upload files associated with an entity. The request to the endpoint includes two parts.",
+    "host_name": "wiki.cobblestonesoftware.com",
+    "rank": 5,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://stackoverflow.com/questions/56352098/how-do-i-upload-a-file-to-a-rest-endpoint",
+    "name": "How do I upload a file to a REST endpoint? - Stack Overflow",
+    "snippet": "To upload a file, you need to send it in a form, in node.js server you save accept the incoming file using formidable. You can also use express-fileupload or ...",
+    "host_name": "stackoverflow.com",
+    "rank": 6,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://aps.autodesk.com/en/docs/data/v2/tutorials/upload-file",
+    "name": "Upload a File | Data Management API - Autodesk Platform Services",
+    "snippet": "This walkthrough explains how to upload a file as a resource item to the project. In the examples, the responses have been condensed for simplicity.",
+    "host_name": "aps.autodesk.com",
+    "rank": 7,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.filestack.com",
+    "name": "Filestack: The Best File Uploader & Upload API",
+    "snippet": "#1 Developer Service for File Uploads. Get user content from anywhere and improve file and video upload with a powerful, easy to use API.",
+    "host_name": "www.filestack.com",
+    "rank": 8,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://experienceleague.adobe.com/en/docs/workfront/using/adobe-workfront-api/document-webhooks-api/file-upload-docu-webhook",
+    "name": "File upload via Document Webhooks | Adobe Workfront",
+    "snippet": "Uploading a file to a document storage provider is a two-step process that requires two separate API endpoints.",
+    "host_name": "experienceleague.adobe.com",
+    "rank": 9,
+    "date": "",
+    "favicon": ""
+  }
+]
