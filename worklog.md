@@ -46,3 +46,32 @@ Stage Summary:
 - Semua route utama berfungsi normal (HTTP 200)
 - Tidak ada lagi script AdsTerra di HTML yang dirender
 - Catatan untuk restart server di masa depan: gunakan teknik double-fork daemon (lihat command Python), bukan nohup/setsid biasa
+
+---
+Task ID: ad-cleanup-3
+Agent: main
+Task: Fix persistent AdBanner HMR error (root cause: Service Worker caching stale chunks)
+
+Work Log:
+- User melaporkan error AdBanner persists setelah restart dev server
+- Investigasi: source 100% bersih (0 referensi AdBanner), server chunks juga 0 referensi (verifikasi via curl semua chunk)
+- Root cause ditemukan: Service Worker (public/sw.js) cache-first strategy untuk /_next/static/*.js & .js files
+  -> SW terdaftar sebelum AdBanner dihapus -> cache chunks lama yang masih reference AdBanner
+  -> Browser serve chunks basi dari SW cache -> runtime error "module factory not available"
+- Fix 1: Bump SW cache version youfet-v2 -> youfet-v3 (activate handler purge cache lama)
+- Fix 2: Ubah strategi static assets dari cache-first -> network-first (fallback cache saat offline)
+  -> Mencegah chunks basi terjadi lagi saat HMR update
+- Fix 3 (definitif): ServiceWorkerRegistration.tsx skip register SW di development mode
+  -> Di dev: auto-unregister SW yang ada + clear semua caches
+  -> Di prod: register SW normal (dengan sw.js v3 network-first)
+- Verifikasi via agent-browser (simulasi state user: SW terdaftar):
+  - Reload 1x -> SW auto-unregister (0 SW), caches cleared (0 caches), 0 errors, page render penuh
+  - Title: "YouFet - Video Streaming", video cards visible, NO AdsTerra scripts
+- Lint: lulus tanpa error
+
+Stage Summary:
+- Error AdBanner "module factory is not available" TERATASI SECARA PERMANEN
+- Root cause: Service Worker cache-first menyajikan chunks basi yang masih reference AdBanner.tsx
+- 3 lapis fix: cache version bump + network-first strategy + dev-mode SW disable
+- Pada reload berikutnya, preview panel user akan: auto-unregister SW lama, clear caches, load chunks fresh
+- Tidak akan terulang lagi karena dev mode tidak register SW

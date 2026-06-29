@@ -1,4 +1,4 @@
-const CACHE_NAME = 'youfet-v2';
+const CACHE_NAME = 'youfet-v3';
 const OFFLINE_URL = '/';
 
 const PRECACHE_URLS = [
@@ -60,7 +60,8 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // For static assets, cache first
+  // For static assets, network first (avoids stale JS/CSS chunks during dev HMR),
+  // fall back to cache when offline.
   if (
     request.url.includes('/icons/') ||
     request.url.includes('/_next/static/') ||
@@ -71,9 +72,8 @@ self.addEventListener('fetch', (event) => {
     request.url.endsWith('.js')
   ) {
     event.respondWith(
-      caches.match(request).then((cached) => {
-        if (cached) return cached;
-        return fetch(request).then((response) => {
+      fetch(request)
+        .then((response) => {
           if (response.ok) {
             const cloned = response.clone();
             caches.open(CACHE_NAME).then((cache) => {
@@ -81,8 +81,8 @@ self.addEventListener('fetch', (event) => {
             });
           }
           return response;
-        });
-      })
+        })
+        .catch(() => caches.match(request))
     );
     return;
   }
