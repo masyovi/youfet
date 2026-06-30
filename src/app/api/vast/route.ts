@@ -17,12 +17,12 @@ import { VASTClient } from '@dailymotion/vast-client'
 const DEFAULT_VAST_TAG = 'https://s.magsrv.com/v1/vast.php?idz=5962192'
 const VAST_TAG_URL = process.env.EXOCLICK_VAST_TAG || DEFAULT_VAST_TAG
 
-// ExoClick in-stream ads for this zone are targeted at mobile traffic.
-// A mobile User-Agent is required — without it ExoClick returns an empty
-// <VAST/> response (no ad). This UA is sent on both the wrapper request and
-// the resolved inline-ad request.
-const MOBILE_UA =
-  'Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36'
+// ExoClick in-stream ads for this zone (idz=5962192) are targeted at desktop
+// traffic. A desktop User-Agent is required — without it ExoClick returns an
+// empty <VAST/> response (no ad). This UA is sent on both the wrapper request
+// and the resolved inline-ad request.
+const DESKTOP_UA =
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
 
 // In-memory cache — avoid hammering ExoClick on every request.
 // Only successful ad responses are cached; errors / no-ad responses are
@@ -114,13 +114,13 @@ export async function GET() {
   try {
     const client = new VASTClient()
     // resolveAll: true follows <Wrapper><VASTAdTagURI> to the inline ad.
-    // ExoClick requires a mobile User-Agent + Accept/Accept-Language headers
-    // to serve ads — without them it returns an empty <VAST/> response.
+    // ExoClick requires a desktop User-Agent for this zone — without it
+    // the response is an empty <VAST/> element (no ad).
     const response = await client.get(VAST_TAG_URL, {
       resolveAll: true,
       fetchOptions: {
         headers: {
-          'User-Agent': MOBILE_UA,
+          'User-Agent': DESKTOP_UA,
           Accept: '*/*',
           'Accept-Language': 'en-US,en;q=0.9',
         },
@@ -178,6 +178,21 @@ export async function GET() {
       skipOffset = 5
     }
 
+    // clickThrough can be either a plain string or an object {id, url}
+    // depending on what the VAST response contains. Normalize to a string.
+    const rawClickThrough = creative.videoClickThroughURLTemplate
+    let clickThrough: string | null = null
+    if (typeof rawClickThrough === 'string') {
+      clickThrough = rawClickThrough
+    } else if (rawClickThrough && typeof rawClickThrough === 'object') {
+      clickThrough =
+        typeof rawClickThrough.url === 'string'
+          ? rawClickThrough.url
+          : typeof rawClickThrough.children === 'string'
+            ? rawClickThrough.children
+            : null
+    }
+
     const payload: VastPayload = {
       ok: true,
       mediaUrl: mediaFile.fileURL,
@@ -187,7 +202,7 @@ export async function GET() {
       bitrate: mediaFile.bitrate || undefined,
       duration: typeof creative.duration === 'number' ? creative.duration : undefined,
       skipOffset,
-      clickThrough: creative.videoClickThroughURLTemplate || null,
+      clickThrough,
       clickTracking: normalizeUrlList(creative.videoClickTrackingURLTemplates || []),
       impressions,
       trackingEvents,
