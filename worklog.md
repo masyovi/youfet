@@ -75,3 +75,25 @@ Stage Summary:
 - 3 lapis fix: cache version bump + network-first strategy + dev-mode SW disable
 - Pada reload berikutnya, preview panel user akan: auto-unregister SW lama, clear caches, load chunks fresh
 - Tidak akan terulang lagi karena dev mode tidak register SW
+
+---
+Task ID: exoclick-verify-1
+Agent: main
+Task: Pasang file verifikasi situs ExoClick di root direktori
+
+Work Log:
+- User upload file verifikasi ExoClick: 3f89cd6f53871b4d46ac84ff99fed454.html (dari /home/z/my-project/upload/)
+- Verifikasi konten file: berisi hash "3f89cd6f53871b4d46ac84ff99fed454" (format standar ExoClick: nama file = konten = hash)
+- Copy file ke /home/z/my-project/public/ (Next.js static serving — file di public/ disajikan di root URL)
+- Verifikasi akses HTTP via curl:
+  - GET /3f89cd6f53871b4d46ac84ff99fed454.html -> HTTP 200 OK
+  - Content-Type: text/html; charset=UTF-8
+  - Content-Length: 32 bytes
+  - Body: "3f89cd6f53871b4d46ac84ff99fed454"
+- Tidak ada konflik dengan Service Worker (SW di-disable di dev mode; di prod SW network-first untuk navigasi & default)
+
+Stage Summary:
+- File verifikasi ExoClick aktif di URL root: https://[domain-anda]/3f89cd6f53871b4d46ac84ff99fed454.html
+- Mengembalikan HTTP 200 dengan body = hash verifikasi
+- User bisa klik "Verify" di dashboard ExoClick untuk menyelesaikan verifikasi situs
+- Setelah verifikasi sukses, user bisa lanjut memasang kode iklan ExoClick di situs
