@@ -7,6 +7,7 @@ import { ArrowLeft, Eye, Clock, Play, AlertTriangle, Home } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
+import { PrerollAd } from '@/components/PrerollAd'
 
 interface Category {
   id: string
@@ -291,11 +292,13 @@ export default function VideoPage() {
   const [error, setError] = useState<string | null>(null)
   const [showIntro, setShowIntro] = useState(false)
   const [isReady, setIsReady] = useState(false)
+  const [prerollDone, setPrerollDone] = useState(false)
 
-  // Show intro on mount
+  // Show intro + reset pre-roll ad on slug change (and on mount)
   useEffect(() => {
     setShowIntro(true)
     setIsReady(false)
+    setPrerollDone(false)
   }, [slug])
 
   useEffect(() => {
@@ -352,6 +355,10 @@ export default function VideoPage() {
   const handleIntroComplete = useCallback(() => {
     setShowIntro(false)
     setIsReady(true)
+  }, [])
+
+  const handlePrerollComplete = useCallback(() => {
+    setPrerollDone(true)
   }, [])
 
   // Loading state
@@ -425,7 +432,12 @@ export default function VideoPage() {
                 )}
               </AnimatePresence>
 
-              {(isReady || !showIntro) && video.embedUrl && (
+              {/* ExoClick In-Stream Pre-Roll Ad — plays after intro, before video */}
+              {(isReady || !showIntro) && !prerollDone && video.embedUrl && (
+                <PrerollAd onComplete={handlePrerollComplete} />
+              )}
+
+              {(isReady || !showIntro) && prerollDone && video.embedUrl && (
                 <motion.iframe
                   key={video.id}
                   src={video.embedUrl}

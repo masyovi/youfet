@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 import { useAppStore } from '@/store/app'
+import { PrerollAd } from '@/components/PrerollAd'
 
 interface Category {
   id: string
@@ -291,14 +292,16 @@ export function VideoPlayer() {
   const [error, setError] = useState<string | null>(null)
   const [showIntro, setShowIntro] = useState(false)
   const [isReady, setIsReady] = useState(false)
+  const [prerollDone, setPrerollDone] = useState(false)
   const prevVideoIdRef = useRef<string | null>(null)
 
-  // Detect video change to trigger intro
+  // Detect video change to trigger intro + reset pre-roll ad
   useEffect(() => {
     if (selectedVideoId && selectedVideoId !== prevVideoIdRef.current) {
       prevVideoIdRef.current = selectedVideoId
       setShowIntro(true)
       setIsReady(false)
+      setPrerollDone(false)
     }
   }, [selectedVideoId])
 
@@ -356,6 +359,10 @@ export function VideoPlayer() {
   const handleIntroComplete = useCallback(() => {
     setShowIntro(false)
     setIsReady(true)
+  }, [])
+
+  const handlePrerollComplete = useCallback(() => {
+    setPrerollDone(true)
   }, [])
 
   // Loading state
@@ -426,7 +433,12 @@ export function VideoPlayer() {
                 )}
               </AnimatePresence>
 
-              {(isReady || !showIntro) && video.embedUrl && (
+              {/* ExoClick In-Stream Pre-Roll Ad — plays after intro, before video */}
+              {(isReady || !showIntro) && !prerollDone && video.embedUrl && (
+                <PrerollAd onComplete={handlePrerollComplete} />
+              )}
+
+              {(isReady || !showIntro) && prerollDone && video.embedUrl && (
                 <motion.iframe
                   key={video.id}
                   src={video.embedUrl}
